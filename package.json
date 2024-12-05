@@ -1,0 +1,27 @@
+{
+  "name": "fornax",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "imports": "bun run scripts/generate-imports.ts",
+    "start": "bun run imports && bun run index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/handlebars": "^4.1.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/domhandler": "^2.4.5",
+    "@types/parse5": "^7.0.0",
+    "handlebars": "^4.7.8",
+    "htmx": "^0.0.2",
+    "incremental-dom": "^0.7.0",
+    "parse5": "^7.2.1",
+    "parse5-htmlparser2-tree-adapter": "^7.1.0",
+    "reflect-metadata": "^0.2.2",
+    "starplate": "^0.0.25"
+  }
+}
