@@ -1,11 +1,22 @@
-import { BaseComponent, Component } from "../src/Core";
+import { Component } from '../src/Decorators';
+import { BaseComponent } from '../src/Component';
 
 @Component({
   selector: 'hello-world',
-  template: `<h1>Hello, World! {{name}}</h1><br/>
-  <button>Go to About</button>`,
-  style: 'h1 { color: red; }'
+  style: `span { color: red; }`,
+  template: `
+    <div>
+      <span>Hello, {{name}}!</span>
+    </div>
+  `
 })
-export class HelloWorld extends BaseComponent {
-    name = 'John Doe';
+class HelloWorld extends BaseComponent {
+  name: string = 'World';
+  
+  onInit(): void {
+    setInterval(() => {
+      this.name = 'Joe';
+    }, 1000);
   }
+
+}

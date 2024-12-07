@@ -16,7 +16,7 @@ const imports = files
   })
   .join('\n');
 
-writeFileSync("main.ts", "import './src/Routing';\n" + imports);
+writeFileSync("main.ts", imports);
 }catch(e){
   console.error(e);
 }

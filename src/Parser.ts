@@ -1,114 +1,85 @@
-import { parseFragment } from 'parse5';
-import { adapter } from 'parse5-htmlparser2-tree-adapter';
+import * as parse5 from 'parse5';
 import {
   text,
   patch,
   elementOpen,
-  elementClose,
+  elementClose
 } from 'incremental-dom';
-import { randomUUIDv7 } from 'bun';
+import { Htmlparser2TreeAdapterMap } from 'parse5-htmlparser2-tree-adapter';
 
-type PatchFunction = (domElement: Element, done?: Function) => void;
-type InstructionFunction = () => void;
+// Re-use your provided Parser class
+let instance_: Parser | null = null;
 
-interface ParsedNode {
-  type: string;
-  name?: string;
-  data?: string;
-  attribs?: { [key: string]: string };
-  children?: ParsedNode[];
-}
+export class Parser extends parse5.Parser<Htmlparser2TreeAdapterMap> {
+  public patches: Map<any, (domElement: Element, done?: Function) => void>;
 
-export default class Parser {
-  private patches: Map<string, PatchFunction>;
-  private static instance: Parser | null = null;
+  static sharedInstance(): Parser {
+    instance_ = instance_ || new Parser();
+    return instance_;
+  }
 
   constructor() {
+    super();
     this.patches = new Map();
   }
 
-  public static sharedInstance(): Parser {
-    if (!Parser.instance) {
-      Parser.instance = new Parser();
-    }
-    return Parser.instance;
-  }
-
-  public createPatch(source: string | Node): PatchFunction {
-    let html: string;
-
-    if (source instanceof HTMLElement) {
-      html = source.innerHTML;
-    } else {
-      html = source as string;
+  createPatch(source: string): (domElement: Element, done?: Function) => void {
+    // If patch already exists, return it
+    if (this.patches.has(source)) {
+      return this.patches.get(source)!;
     }
 
-    const sourceKey = typeof source === 'string' ? source : html;
+    // Normalize HTML
+    let html = String(source).replace(/\n/g, ' ').replace(/\r/g, ' ');
 
-    if (this.hasPatch(sourceKey)) {
-      return this.getPatch(sourceKey) as PatchFunction;
-    }
-
-    html = html.replace(/[\n\r]/g, ' ');
-
-    const root = parseFragment(html, {
-      treeAdapter: adapter,
-    }) as ParsedNode;
-    const nodes = root.children || [];
-
-    const stack: InstructionFunction[] = [];
-
-    const createInstruction = (fn: InstructionFunction) => stack.push(fn);
-
-    const partial: PatchFunction = (domElement: Element, done?: Function) => {
-      const callback = ensureFunction(done);
+    const root = parse5.parseFragment<Htmlparser2TreeAdapterMap>(html);
+    const nodes = root.childNodes; // Ensure we're using childNodes
+    
+    const stack: Function[] = [];
+    const createInstruction = (fn: Function) => stack.push(fn);
+    
+    const partial = (domElement: Element, done?: Function) => {
+      done = typeof done === 'function' ? done : () => undefined;
       patch(domElement, () => {
-        stack.forEach((routine) => routine());
-        callback();
+        stack.forEach(routine => routine());
+        done();
       });
     };
-
-    const traverse = (node: ParsedNode) => {
-      const attributesArray: (string | number)[] = [];
-      const id = node.attribs?.id || randomUUIDv7("base64", Date.now());;
-      const attrs = node.attribs || {};
-
-      for (const [key, value] of Object.entries(attrs)) {
-        if (value != null) {
-          attributesArray.push(key, value);
-        }
+    
+    function getAttribs(node: any): { [key: string]: string } {
+      const attribs: { [key: string]: string } = {};
+      if (node.attrs && Array.isArray(node.attrs)) {
+        node.attrs.forEach(attr => {
+          attribs[attr.name] = attr.value;
+        });
       }
-
-      if (node.type === 'tag' && node.name) {
-        createInstruction(() => elementOpen(node.name!, id, null, ...attributesArray));
-        if (node.children && node.children.length > 0) {
-          node.children.forEach(traverse);
-        }
-        createInstruction(() => elementClose(node.name!));
-      } else if (node.type === 'text' && node.data) {
-        createInstruction(() => text(node.data!));
-      } else if (node.type === 'script') {
-        // Skip script nodes
-      } else {
-        throw new TypeError(`Unhandled node type ${node.type}.`);
+      return attribs;
+    }
+    
+    const traverse = (node: any) => {
+      const attribs = getAttribs(node);
+      const id = attribs.id || crypto.randomUUID(); // or another UUID method
+      const kv: (string | number)[] = [];
+    
+      for (const key in attribs) {
+        kv.push(key, attribs[key]);
+      }
+    
+      const hasChildren = Boolean(node.childNodes && node.childNodes.length);
+    
+      if (node.nodeName && node.nodeName !== '#text' && node.nodeName !== '#document-fragment') {
+        // It's an element
+        createInstruction(() => elementOpen(node.nodeName, id, null, ...kv));
+        if (hasChildren) node.childNodes.forEach(traverse);
+        createInstruction(() => elementClose(node.nodeName));
+      } else if (node.nodeName === '#text' && node.value) {
+        // It's a text node
+        createInstruction(() => text(node.value));
       }
     };
-
+    
     nodes.forEach(traverse);
-
-    this.patches.set(sourceKey, partial);
-
+    this.patches.set(source, partial);
     return partial;
   }
-
-  private hasPatch(source: string): boolean {
-    return this.patches.has(source);
-  }
-
-  private getPatch(source: string): PatchFunction | null {
-    return this.patches.get(source) || null;
-  }
 }
-
-const ensureFunction = (fn: unknown): Function =>
-  typeof fn === 'function' ? fn : () => {};

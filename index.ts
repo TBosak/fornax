@@ -21,7 +21,7 @@ readdirSync(rootDir).forEach(file => {
 });
 
 // Function to serve static files
-async function serveStatic(filePath: string): any {
+async function serveStatic(filePath: string): Promise<any> {
   try {
     const fileBuffer = await Bun.file(filePath).arrayBuffer();
     const ext = path.extname(filePath).toLowerCase();
