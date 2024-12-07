@@ -44,6 +44,7 @@ export class BaseComponent extends HTMLElement {
       this.__config.template = `<style>${this.__config.style || ''}</style>${this.__config.template}`;
       this.init();
     }
+    this.onInit();
   }
 
   disconnectedCallback() {
