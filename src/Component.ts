@@ -1,7 +1,6 @@
 // BaseComponent.ts
 import { Template } from "./Template";
 import { Parser } from "./Parser";
-import { patch, elementOpen, elementClose, text } from 'incremental-dom';
 
 export class ComponentConfig {
   selector: string;

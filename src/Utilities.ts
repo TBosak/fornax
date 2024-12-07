@@ -3,37 +3,34 @@ export function ensureObject(o: any): object {
     return o != null && typeof o === 'object' ? o : {};
   }
   
-export function makeSafeObject(o: any): any {
-    let out = String();
-  
-    if (typeof o === 'function') {
-      return o;
+  export function makeSafeObject(o: any, visited = new WeakSet()): any {
+    if (o === null || typeof o !== 'object') {
+        // Return the value as-is if it's not an object
+        return o;
     }
-  
-    if (o == null || typeof o !== 'object') {
-      if (typeof o === 'string') {
-        try {
-          return JSON.stringify(JSON.parse(o));
-        } catch (e) {}
-      }
-      return JSON.stringify(o);
+
+    if (visited.has(o)) {
+        // Circular reference detected; return undefined or a placeholder
+        return undefined;
     }
-  
-    if (typeof o === 'object') {
-      for (const k in o) {
-        o[k] = makeSafeObject(o[k]);
-      }
-      if (Array.isArray(o)) {
-        out += '[';
-        for (const k in o) out += `${o[k]}, `;
-        out += ']';
-      } else {
-        out += '{';
-        for (const k in o) out += `${k}: ${o[k]}, `;
-        out += '}';
-      }
+
+    visited.add(o);
+
+    if (Array.isArray(o)) {
+        // Process each item in the array
+        return o.map(item => makeSafeObject(item, visited));
     }
-  
-    return out;
-  }
+
+    // Create a new object to avoid modifying the original
+    const safeObj: any = {};
+    for (const key of Object.keys(o)) {
+        const value = o[key];
+        // Exclude functions
+        if (typeof value !== 'function') {
+            safeObj[key] = makeSafeObject(value, visited);
+        }
+    }
+
+    return safeObj;
+}
   

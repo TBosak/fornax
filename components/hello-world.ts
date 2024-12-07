@@ -12,11 +12,4 @@ import { BaseComponent } from '../src/Component';
 })
 class HelloWorld extends BaseComponent {
   name: string = 'World';
-  
-  onInit(): void {
-    setInterval(() => {
-      this.name = 'Joe';
-    }, 1000);
-  }
-
 }

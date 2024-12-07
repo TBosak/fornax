@@ -1,3 +1,4 @@
+// Template.ts
 import { ensureObject, makeSafeObject } from "./Utilities";
 
 export class Template {
@@ -6,35 +7,37 @@ export class Template {
 
   static createPartial(str: string | Function) {
     if (typeof str === 'string') {
-      str = str.replace(new RegExp('`', 'g'), '\\`');
+      // Escape backticks to prevent template literal issues
+      str = str.replace(/`/g, '\\`');
+      // Replace {{var}} with ${var} for template literals
+      str = str.replace(/\{\{\s*([^}]+)\s*\}\}/g, '${$1}');
     }
 
     return (data?: any, scope?: any): string => {
       data = ensureObject(data);
       scope = scope || this;
 
-      let wrap: string | Function = str;
-      let headerVars = Object
-        .keys(data)
-        .map(key => {
-          const value = makeSafeObject(data[key]);
-          return `${key} = ${value}`;
-        });
+      // Sanitize the data to prevent circular references and exclude functions
+      const safeData = makeSafeObject(data);
 
-      const header = headerVars.length ? `var ${headerVars.join(', ')};` : '';
+      let headerVars = Object.keys(safeData).map(key => {
+        // Declare variables corresponding to the data keys
+        return `let ${key} = safeData['${key}']`;
+      });
+
+      const header = headerVars.length ? `${headerVars.join('; ')};` : '';
 
       if (typeof str === 'string') {
-        str = str.replace(/`/g, '\\`');
-        str = str.replace(/\{\{\s*([^}]+)\s*\}\}/g, '${$1}');
+        // Create a new function to evaluate the template string with data
+        return new Function('safeData', `'use strict'; ${header} return \`${str}\`;`)(safeData);
       }
 
-      if (typeof wrap !== 'function') {
-        wrap = new Function('data', `'use strict'; ${header} return \`${str}\``);
+      // If str is a function, execute it with the safeData
+      if (typeof str === 'function') {
+        return str.call(scope, safeData);
       }
 
-      const src = `'use strict'; return wrap.call(this, data);`;
-      const fn = new Function('data', 'wrap', src);
-      return String(fn.call(scope, data, wrap) || '');
+      return '';
     };
   }
 
