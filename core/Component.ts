@@ -17,7 +17,6 @@ export class BaseComponent extends HTMLElement {
 
   constructor() {
     super();
-    // Initialize __config here if necessary, possibly via decorators
   }
 
   connectedCallback() {
@@ -134,24 +133,25 @@ export class BaseComponent extends HTMLElement {
   }
 
   private render(): void {
+
+    // Attach shadow root if it doesn't exist
     if (!this.shadowRoot) {
-      this.attachShadow({ mode: 'open' });
-      // Create a container for incremental-dom
-      const container = document.createElement('div');
-      container.setAttribute('data-root', 'true');
-      this.shadowRoot.appendChild(container);
+        this.attachShadow({ mode: 'open' });
     }
 
-    const container = this.shadowRoot!.querySelector('div[data-root="true"]') as Element;
+    const shadow = this.shadowRoot!;
 
-    if (!container) return;
-
+    // Render the template into the shadow root using incremental-dom
     const parser = Parser.sharedInstance();
-    const templateSource = this.template.render(this.getModel());
+    const templateSource = this.template.render(this.getModel()) as string;
     const patchFn = parser.createPatch(templateSource);
 
-    patchFn(container);
-  }
+    try {
+        patchFn(shadow);
+    } catch (error) {
+        console.error('Render Error:', error);
+    }
+}
 
   onInit(): void {
     // Optionally override this method

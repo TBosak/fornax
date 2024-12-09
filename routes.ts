@@ -1,5 +1,5 @@
 import { AboutPage, HomePage } from './components/testing';
-import { Route } from './src/Routing';
+import { Route } from './core/Routing';
 
 const routes: Route[] = [
   { path: '/', component: HomePage },
