@@ -1,15 +1,7 @@
-# fornax
+TODO:
 
-To install dependencies:
-
-```bash
-bun install
-```
-
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.1.34. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+Parser - LRU Caching, deterministic & hierarchal ID generation
+Router - build on top of Vaadin router for now & create replacement later
+Services - add services & Injectable decorator...should there be a base service class?
+Should there be a SubscriptionTracker baked into BaseComponent & we unsubscribe on disconnectedCallback?
+Implementing standalone components and Angular-like module system? Right now I'm just dumping everything into main.
