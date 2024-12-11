@@ -15,7 +15,7 @@ export function Component(config: ComponentConfig) {
 
     // Define the custom element using the provided selector from config
     customElements.define(config.selector, customElementClass);
-
+    target['selector'] = config.selector;
     // Return the newly extended and defined class
     return customElementClass;
   };

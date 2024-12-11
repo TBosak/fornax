@@ -16,7 +16,7 @@ if (!existsSync(distDir)) {
 
 // Copy static HTML files (like index.html) to the dist directory
 readdirSync(srcDir).forEach(file => {
-  if (file.endsWith('.html')) {
+  if (file.endsWith('.html') || file.endsWith('.ico')) {
     copyFileSync(path.join(srcDir, file), path.join(distDir, file));
   }
 });

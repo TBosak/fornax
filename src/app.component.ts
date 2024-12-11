@@ -4,7 +4,9 @@ import { Component, BaseComponent } from '../core/index';
   selector: 'app-component',
   style: `span { color: red; }`,
   template: `
-    <hello-world (nameChange)="test"></hello-world>
+    <a href="/">Hello World</a>
+    <a href="/other">Other</a>
+    <router-outlet></router-outlet>
   `
 })
 export class Testing extends BaseComponent {
