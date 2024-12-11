@@ -25,7 +25,7 @@ export class RouterOutlet extends BaseComponent {
 
         // Initialize the router only once
         if (!this.router) {
-            this.router = new Router<HTMLElement>(this);
+            this.router = new Router(this);
             this.setRoutes();
         }
     }
@@ -38,7 +38,6 @@ export class RouterOutlet extends BaseComponent {
                 component: route.component['selector'] // Adjusted selector retrieval
             };
         });
-        console.log('Router routes:', input);
         this.router?.setRoutes(input);
     }
 
