@@ -1,6 +1,7 @@
-// BaseComponent.ts
 import { Template } from "./Template";
 import { Parser } from "./Parser";
+import { toCamelCase, toKebabCase } from "./Utilities";
+import { Binding } from "./Template";
 
 export class ComponentConfig {
   selector: string;
@@ -14,12 +15,21 @@ export class BaseComponent extends HTMLElement {
   __config: ComponentConfig;
   template: Template;
   model: any;
+  static inputs: string[] = [];
+  static outputs: string[] = [];
+  private _shadow: ShadowRoot; // Private reference to the closed shadow root
+  private renderScheduled: boolean = false;
 
   constructor() {
     super();
   }
 
   connectedCallback() {
+    this._shadow = this.attachShadow({ mode: 'closed' });
+    this.initializeComponent();
+}
+
+private initializeComponent() {
     // Fetch and initialize template and style
     if (this.__config && this.__config.templateUrl) {
       fetch(this.__config.templateUrl)
@@ -99,12 +109,12 @@ export class BaseComponent extends HTMLElement {
             ? (newVal: any) => {
                 originalSet.call(this, newVal);
                 this.setModel();
-                this.render();
+                this.scheduleRender();
               }
             : (newVal: any) => {
                 internalValue = newVal;
                 this.setModel();
-                this.render();
+                this.scheduleRender();
               };
 
           Object.defineProperty(this, key, {
@@ -132,26 +142,64 @@ export class BaseComponent extends HTMLElement {
     }
   }
 
-  private render(): void {
-
-    // Attach shadow root if it doesn't exist
-    if (!this.shadowRoot) {
-        this.attachShadow({ mode: 'open' });
-    }
-
-    const shadow = this.shadowRoot!;
-
-    // Render the template into the shadow root using incremental-dom
-    const parser = Parser.sharedInstance();
-    const templateSource = this.template.render(this.getModel()) as string;
-    const patchFn = parser.createPatch(templateSource);
-
-    try {
-        patchFn(shadow);
-    } catch (error) {
-        console.error('Render Error:', error);
+  private scheduleRender(): void {
+    if (!this.renderScheduled) {
+        this.renderScheduled = true;
+        requestAnimationFrame(() => {
+            this.render();
+            this.renderScheduled = false;
+        });
     }
 }
+
+
+private render(): void {
+
+  if (!this._shadow) {
+      console.error('Shadow root is not attached.');
+      return;
+  }
+
+  const shadow = this._shadow;
+
+  // Render the template into the shadow root using incremental-dom
+  const parser = Parser.sharedInstance();
+  const renderResult = this.template.render(this.getModel(), this) as [string, Binding[]];
+  const [templateString, bindings] = renderResult;
+
+  const patchFn = parser.createPatch(templateString);
+
+  try {
+      patchFn(shadow);
+
+      // Attach event listeners based on bindings
+      bindings.forEach(binding => {
+          const { eventName, handlerName } = binding;
+          const handler = (this as any)[handlerName];
+          if (typeof handler === 'function') {
+              shadow.addEventListener(eventName, handler.bind(this));
+              console.log(`Attached event listener for '${eventName}' to handler '${handlerName}'.`);
+          } else {
+              console.warn(`Handler '${handlerName}' is not a function.`);
+          }
+      });
+  } catch (error) {
+      console.error('Render Error:', error);
+  }
+}
+
+
+  static get observedAttributes() {
+    return this.inputs.map(input => toKebabCase(input));
+  }
+
+  attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+    const propName = toCamelCase(name);
+    if ((this.constructor as typeof BaseComponent).inputs && (this.constructor as typeof BaseComponent).inputs.includes(propName)) {
+        (this as any)[propName] = newValue;
+    }
+}
+
 
   onInit(): void {
     // Optionally override this method

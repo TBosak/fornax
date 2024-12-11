@@ -12,10 +12,10 @@
   },
   "dependencies": {
     "@types/bun": "latest",
-    "@types/domhandler": "^2.4.5",
     "@types/parse5": "^7.0.0",
     "incremental-dom": "^0.7.0",
     "parse5": "^7.2.1",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
   }
 }

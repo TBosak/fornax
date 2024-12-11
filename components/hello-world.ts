@@ -1,3 +1,5 @@
+import { Output } from '../core/Decorators';
+import { Emitter } from '../core/Emitter';
 import { Component, BaseComponent } from '../core/index';
 
 @Component({
@@ -5,13 +7,26 @@ import { Component, BaseComponent } from '../core/index';
   style: `span { color: red; }`,
   template: `
     <div>
-      <span>Hello, {{this.getName()}}!</span>
+      <span>Hello, {{this.name}}!</span>
     </div>
   `
 })
 class HelloWorld extends BaseComponent {
-  name: string = 'World';
-  getName(){
-    return this.name;
+  name = "World";
+  @Output() nameChange: Emitter<string>;
+  // getName(){
+  //   return this.name;
+  // }
+
+  //list of names
+  names: string[] = ['Alice', 'Bob', 'Charlie'];
+  //cycle through names
+  cycleNames(){
+    let name = this.names.shift();
+    this.names.push(name);
+    this.name = name;
+    this.nameChange.emit(name);
   }
+  //cycle through names every 2 seconds
+  interval: any = setInterval(() => this.cycleNames(), 2000);
 }
