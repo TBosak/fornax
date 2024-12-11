@@ -9,6 +9,6 @@ TODO:
 ~~Router - build on top of Vaadin router for now~~ & create replacement later <br>
 Services - add services & Injectable decorator...should there be a base service class? <br>
 Should there be a SubscriptionTracker baked into BaseComponent & we unsubscribe on disconnectedCallback? <br>
-Implementing standalone components and Angular-like module system? Right now I'm just dumping everything into main.
+Implementing standalone components and Angular-like module system? Right now I'm just dumping everything into main. <br>
 Set up Vite for HMR when running dev script, with Bun handling prod build or can we just achieve live reloading with Bun? - https://bun.sh/guides/read-file/watch
 
