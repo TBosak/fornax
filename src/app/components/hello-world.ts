@@ -1,6 +1,6 @@
-import { Output } from '../core/Decorators';
-import { Emitter } from '../core/Emitter';
-import { Component, BaseComponent } from '../core/index';
+import { Output } from '../../../core/Decorators';
+import { Emitter } from '../../../core/Emitter';
+import { Component, BaseComponent } from '../../../core/index';
 
 @Component({
   selector: 'hello-world',
@@ -11,7 +11,7 @@ import { Component, BaseComponent } from '../core/index';
     </div>
   `
 })
-class HelloWorld extends BaseComponent {
+export class HelloWorld extends BaseComponent {
   name = "World";
   @Output() nameChange: Emitter<string>;
   // getName(){

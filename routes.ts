@@ -1,10 +1,9 @@
-import { AboutPage, HomePage } from './components/testing';
+
 import { Route } from './core/Routing';
+import { HelloWorld } from './src/app/components/hello-world';
+import { Other } from './src/app/components/other';
 
-const routes: Route[] = [
-  { path: '/', component: HomePage },
-  { path: '/about', component: AboutPage },
+export const routes: Route[] = [
+  { path: '/', component: HelloWorld },
+  { path: '/other', component: Other },
 ];
-
-// Attach routes to the window object or a global variable
-(window as any).appRoutes = routes;

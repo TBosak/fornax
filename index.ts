@@ -6,6 +6,7 @@ import path from 'path';
 
 // Define the directory paths
 const rootDir = path.resolve(__dirname, './');
+const srcDir = path.join(rootDir, 'src');
 const distDir = path.join(rootDir, 'dist');
 
 // Ensure the dist directory exists
@@ -14,9 +15,9 @@ if (!existsSync(distDir)) {
 }
 
 // Copy static HTML files (like index.html) to the dist directory
-readdirSync(rootDir).forEach(file => {
+readdirSync(srcDir).forEach(file => {
   if (file.endsWith('.html')) {
-    copyFileSync(path.join(rootDir, file), path.join(distDir, file));
+    copyFileSync(path.join(srcDir, file), path.join(distDir, file));
   }
 });
 

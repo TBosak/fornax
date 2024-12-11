@@ -13,6 +13,7 @@
   "dependencies": {
     "@types/bun": "latest",
     "@types/parse5": "^7.0.0",
+    "@vaadin/router": "^2.0.0",
     "incremental-dom": "^0.7.0",
     "parse5": "^7.2.1",
     "reflect-metadata": "^0.2.2",
