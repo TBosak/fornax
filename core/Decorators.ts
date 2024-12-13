@@ -1,5 +1,7 @@
 import { ComponentConfig } from "./Component";
 import { Emitter } from "./Emitter";
+import { DependencyContainer } from './DependencyContainer';
+import 'reflect-metadata';
 
 export function Component(config: ComponentConfig) {
   return function<T extends { new(...args: any[]): HTMLElement }>(target: T) {
@@ -67,3 +69,20 @@ export function Output() {
 });
   }
 }
+
+interface ServiceOptions {
+    singleton?: boolean;
+}
+
+export function Service(options?: ServiceOptions) {
+    return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+        // Define metadata for singleton flag
+        Reflect.defineMetadata('singleton', options?.singleton ?? false, constructor);
+
+        if (options?.singleton) {
+            const serviceName = constructor.name;
+            DependencyContainer.getInstance().registerSingleton(constructor, serviceName);
+        }
+    };
+}
+
