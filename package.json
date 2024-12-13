@@ -3,9 +3,7 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "imports": "bun run scripts/generate-imports.ts",
-    "main": "bun build main.ts --outdir dist",
-    "start": "bun run imports && bun run main && bun run index.ts"
+    "start": "bun run index.ts"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

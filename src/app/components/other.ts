@@ -6,7 +6,7 @@ import { Component } from "../../../core/Decorators";
     style: `span { color: blue; }`,
     template: `
       <div>
-        <span>I'm Other!</span>
+        <span>I'm Other!!</span>
       </div>
     `
   })

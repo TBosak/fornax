@@ -21,7 +21,9 @@ readdirSync(srcDir).forEach(file => {
   }
 });
 
-const childProc = Bun.spawn(["bun", "./scripts/live-reload.ts"],{stdout: "inherit"});
+const buildProc = Bun.spawn(["bun", "./scripts/build.ts"],{stdout: "inherit"});
+await buildProc.exited;
+const liveReloadProc = Bun.spawn(["bun", "./scripts/live-reload.ts"],{stdout: "inherit"});
 
 // Function to serve static files
 async function serveStatic(filePath: string): Promise<any> {
@@ -108,12 +110,12 @@ console.log(`Server is running at http://localhost:5000`);
 
 process.on("SIGINT", () => {
   console.log("Received SIGINT. Cleaning up...");
-  childProc.kill();
+  liveReloadProc.kill();
   process.exit(0);
 });
 
 process.on("SIGTERM", () => {
   console.log("Received SIGTERM. Cleaning up...");
-  childProc.kill();
+  liveReloadProc.kill();
   process.exit(0);
 });
