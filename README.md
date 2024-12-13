@@ -1,6 +1,7 @@
 <div align="center">
   
-<img width="150px" src="https://github.com/user-attachments/assets/e4d19601-871b-478d-8bff-bce5a363a553">
+<img width="150px" src="https://github.com/user-attachments/assets/cbe98a21-31f1-4209-af64-8a43f058f3cf">
+
   
 <h1>Fornax</h1>
 </div>
