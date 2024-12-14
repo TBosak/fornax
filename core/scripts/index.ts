@@ -1,29 +1,20 @@
-// index.ts
-
 import { serve } from "bun";
-import { existsSync, mkdirSync, readdirSync, copyFileSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
 import path from 'path';
+import { loadConfig } from "./load-config";
 
 // Define the directory paths
-const rootDir = path.resolve(__dirname, './');
-const srcDir = path.join(rootDir, 'src');
-const distDir = path.join(rootDir, 'dist');
+const config = loadConfig();
+const rootDir = process.cwd();
 
 // Ensure the dist directory exists
-if (!existsSync(distDir)) {
-  mkdirSync(distDir);
+if (!existsSync(config.distDir)) {
+  mkdirSync(config.distDir);
 }
 
-// Copy static HTML files (like index.html) to the dist directory
-readdirSync(srcDir).forEach(file => {
-  if (file.endsWith('.html') || file.endsWith('.ico')) {
-    copyFileSync(path.join(srcDir, file), path.join(distDir, file));
-  }
-});
-
-const buildProc = Bun.spawn(["bun", "./scripts/build.ts"],{stdout: "inherit"});
+const buildProc = Bun.spawn(["bun", `${__dirname}/build.ts`],{stdout: "inherit"});
 await buildProc.exited;
-const liveReloadProc = Bun.spawn(["bun", "./scripts/live-reload.ts"],{stdout: "inherit"});
+const liveReloadProc = Bun.spawn(["bun", `${__dirname}/live-reload.ts`],{stdout: "inherit"});
 
 // Function to serve static files
 async function serveStatic(filePath: string): Promise<any> {
@@ -78,7 +69,7 @@ serve({
     }
 
     // Define the path to the requested file
-    let filePath = path.join(distDir, pathname);
+    let filePath = path.join(config.distDir, pathname);
 
     // If the path is a directory, append 'index.html'
     if (pathname.endsWith('/')) {
@@ -96,7 +87,7 @@ serve({
       return await serveStatic(filePath);
     } else {
       // For SPA routes, serve 'index.html'
-      const indexPath = path.join(distDir, 'index.html');
+      const indexPath = path.join(config.distDir, 'index.html');
       if (existsSync(indexPath)) {
         return await serveStatic(indexPath);
       } else {

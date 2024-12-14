@@ -1,9 +1,5 @@
+import { Binding } from "./Models";
 import { ensureObject, makeSafeObject } from "./Utilities";
-
-export interface Binding {
-    eventName: string;
-    handlerName: string;
-}
 
 export class Template {
     public source: string | Function | null = null;

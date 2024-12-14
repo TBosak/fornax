@@ -2,6 +2,9 @@
   "name": "fornax",
   "module": "index.ts",
   "type": "module",
+  "bin": {
+    "fnx": "bun run ./core/scripts/cli.ts --silent=false"
+  },
   "scripts": {
     "start": "bun run index.ts"
   },

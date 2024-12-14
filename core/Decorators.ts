@@ -16,7 +16,12 @@ export function Component(config: ComponentConfig) {
     }
 
     // Define the custom element using the provided selector from config
-    customElements.define(config.selector, customElementClass);
+    if (customElements.get(config.selector)) {
+      // The custom element is defined
+    } else {
+      // The custom element is not defined
+      customElements.define(config.selector, customElementClass);
+    }
     target['selector'] = config.selector;
     // Return the newly extended and defined class
     return customElementClass;

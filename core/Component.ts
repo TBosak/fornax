@@ -1,7 +1,7 @@
 import { Template } from "./Template";
 import { Parser } from "./Parser";
 import { toCamelCase, toKebabCase } from "./Utilities";
-import { Binding } from "./Template";
+import { Binding } from "./Models";
 
 export class ComponentConfig {
   selector: string;

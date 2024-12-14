@@ -1,4 +1,6 @@
 import { BaseComponent } from "./Component";
-import { Component } from "./Decorators";
+import { Component, Input, Output } from "./Decorators";
+import { Emitter } from "./Emitter";
+import { RouterOutlet } from "./Routing";
 
-export { BaseComponent, Component };
+export { BaseComponent, Component, Input, Output, Emitter, RouterOutlet };

@@ -1,22 +1,11 @@
-// src/components/RouterOutlet.ts
 import { Router } from "@vaadin/router";
 import { BaseComponent } from "./Component";
-import { Component } from "./Decorators";
-import { routes } from "../routes";
+import type { Route } from "./Models";
 
-export interface Route {
-    path: string;
-    component: CustomElementConstructor;
-}
-
-@Component({
-    selector: 'router-outlet',
-    template: `<slot></slot>`
-})
 export class RouterOutlet extends BaseComponent {
     private router: Router | null = null;
 
-    constructor() {
+    constructor(private routes: Route[]) {
         super();
     }
 
@@ -32,9 +21,9 @@ export class RouterOutlet extends BaseComponent {
 
     private setRoutes() {
         // Map the routes to the format expected by Vaadin Router
-        const input = routes.map((route: any) => {
+        const input = this.routes.map((route: Route) => {
             return { 
-                path: route.path, 
+                path: route.path,
                 component: route.component['selector'] // Adjusted selector retrieval
             };
         });
