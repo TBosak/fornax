@@ -1,0 +1,14 @@
+{
+  "name": "test",
+  "type": "module",
+  "scripts": {
+    "start": "fnx dev"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0",
+    "fornax": "link:fornax"
+  }
+}

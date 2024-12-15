@@ -175,4 +175,5 @@ dist
 .DS_Store
 
 #Test application
-app/
+TestApp/node_modules
+TestApp/dist

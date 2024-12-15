@@ -28,7 +28,7 @@ export async function runInBackground(cmd: string, args: string[], options: any 
   return proc;
 }
 
-async function dev(config: FornaxConfig) {
+async function dev() {
 
   // Generate imports
     const backendProc = await runInBackground("bun", [`${__dirname}/index.ts`, "--watch"]);
@@ -44,7 +44,7 @@ async function dev(config: FornaxConfig) {
     });
 }
 
-async function build(config: FornaxConfig) {
+async function build() {
   // Generate imports
   await runCommand("bun", ["run", `${__dirname}/build.ts`]);  
   console.log("Build complete!");
@@ -54,7 +54,7 @@ async function start(config: FornaxConfig) {
   // Ensure dist is built
   if (!existsSync(resolve(config.distDir))) {
     console.log("Dist directory not found. Running build...");
-    await build(config);
+    await build();
   }
 
   // Start server without watch
@@ -78,10 +78,10 @@ async function start(config: FornaxConfig) {
 
   switch (command) {
     case 'dev':
-      await dev(config);
+      await dev();
       break;
     case 'build':
-      await build(config);
+      await build();
       break;
     case 'start':
       await start(config);

@@ -1,6 +1,7 @@
 import { readdirSync, writeFileSync } from 'fs';
 import { basename, extname, join, resolve } from 'path';
 import { loadConfig } from './load-config';
+import { copyFolderRecursiveSync } from '../Utilities';
 
 const config = loadConfig();
 
@@ -33,9 +34,17 @@ const build = await Bun.build({
   outdir: config.distDir,
   target: "browser",
   splitting: true,
+  minify: true,
+  naming: {
+    entry: '[name].[ext]'
+  },
 });
 
-console.log(build.logs);
+copyFolderRecursiveSync(join(config.srcDir, 'assets'), join(config.distDir, 'assets'));
+
+if(build.logs.length){
+  console.log(build.logs);
+}
 
 }catch(e){
   console.error(e);

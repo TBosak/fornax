@@ -1,15 +1,8 @@
 import { Template } from "./Template";
 import { Parser } from "./Parser";
 import { toCamelCase, toKebabCase } from "./Utilities";
-import { Binding } from "./Models";
-
-export class ComponentConfig {
-  selector: string;
-  templateUrl?: string;
-  styleUrl?: string;
-  style?: string;
-  template?: string;
-}
+import { Binding, ComponentConfig } from "./Models";
+import { globalStyles } from "./scripts/global-styles";
 
 export class BaseComponent extends HTMLElement {
   __config: ComponentConfig;
@@ -24,37 +17,58 @@ export class BaseComponent extends HTMLElement {
     super();
   }
 
-  connectedCallback() {
+connectedCallback() {
     this._shadow = this.attachShadow({ mode: 'closed' });
     this.initializeComponent();
 }
 
-private initializeComponent() {
-    // Fetch and initialize template and style
-    if (this.__config && this.__config.templateUrl) {
-      fetch(this.__config.templateUrl)
-        .then(response => response.text())
-        .then(template => {
-          if (this.__config.styleUrl) {
-            return fetch(this.__config.styleUrl)
-              .then(resp => resp.text())
-              .then(style => {
-                this.__config.style = style;
-                this.__config.template = `<style>${this.__config.style || ''}</style>${template}`;
-                this.init();
-              });
-          } else {
-            this.__config.template = `<style>${this.__config.style || ''}</style>${template}`;
+private async initializeComponent() {
+  let globalCSS;
+if (this.__config.styleMode !== 'scoped') {
+  globalCSS = await globalStyles;
+}
+
+if (this.__config && this.__config.templateUrl) {
+  fetch(this.__config.templateUrl)
+    .then(response => response.text())
+    .then(template => {
+      if (this.__config.styleUrl) {
+        return fetch(this.__config.styleUrl)
+          .then(resp => resp.text())
+          .then(style => {
+            this.__config.style = style;
+            let combinedStyles = this.__config.style || '';
+
+            // If not scoped, prepend globalStyles, then add local after global
+            if (this.__config.styleMode !== 'scoped') {
+              combinedStyles = `${combinedStyles}\n${globalCSS}`;
+            }
+
+            this.__config.template = `<style>${combinedStyles}</style>${template}`;
             this.init();
-          }
-        });
-    } else if (this.__config && this.__config.template) {
-      // If template is already inline, initialize directly
-      this.__config.template = `<style>${this.__config.style || ''}</style>${this.__config.template}`;
-      this.init();
-    }
-    this.onInit();
+          });
+      } else {
+        let combinedStyles = this.__config.style || '';
+        if (this.__config.styleMode !== 'scoped') {
+          combinedStyles = `${combinedStyles}\n${globalCSS}`;
+        }
+
+        this.__config.template = `<style>${combinedStyles}</style>${template}`;
+        this.init();
+      }
+    });
+} else if (this.__config && this.__config.template) {
+  let combinedStyles = this.__config.style || '';
+  if (this.__config.styleMode !== 'scoped') {
+    combinedStyles = `${combinedStyles}\n${globalCSS}`;
   }
+
+  this.__config.template = `<style>${combinedStyles}</style>${this.__config.template}`;
+  this.init();
+}
+
+this.onInit();
+}
 
   disconnectedCallback() {
     this.onDestroy();
@@ -153,7 +167,7 @@ private initializeComponent() {
 }
 
 
-private render(): void {
+private async render() {
 
   if (!this._shadow) {
       console.error('Shadow root is not attached.');
@@ -177,12 +191,13 @@ private render(): void {
           const { eventName, handlerName } = binding;
           const handler = (this as any)[handlerName];
           if (typeof handler === 'function') {
-              shadow.addEventListener(eventName, handler.bind(this));
+            this._shadow.addEventListener(eventName, handler.bind(this));
               console.log(`Attached event listener for '${eventName}' to handler '${handlerName}'.`);
           } else {
               console.warn(`Handler '${handlerName}' is not a function.`);
           }
       });
+        
   } catch (error) {
       console.error('Render Error:', error);
   }

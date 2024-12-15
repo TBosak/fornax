@@ -1,3 +1,6 @@
+import { existsSync, mkdirSync, readdirSync, lstatSync, copyFileSync } from 'fs';
+import path from 'path';
+
 export function ensureObject(o: any): object {
     return o != null && typeof o === 'object' ? o : {};
   }
@@ -39,4 +42,26 @@ export function toKebabCase(str: string): string {
 
 export function toCamelCase(str: string): string {
     return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+}
+
+export function copyFolderRecursiveSync(src, dest) {
+  const exists = existsSync(dest);
+  if (!exists) {
+    mkdirSync(dest);
+  }
+
+  const files = readdirSync(src);
+
+  for (const file of files) {
+    const srcFilePath = path.join(src, file);
+    const destFilePath = path.join(dest, file);
+
+    const stat = lstatSync(srcFilePath);
+
+    if (stat.isFile()) {
+      copyFileSync(srcFilePath, destFilePath);
+    } else if (stat.isDirectory()) {
+      copyFolderRecursiveSync(srcFilePath, destFilePath);
+    }
+  }
 }
