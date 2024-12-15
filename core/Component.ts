@@ -17,58 +17,58 @@ export class BaseComponent extends HTMLElement {
     super();
   }
 
-connectedCallback() {
-    this._shadow = this.attachShadow({ mode: 'closed' });
+  connectedCallback() {
+    this._shadow = this.attachShadow({ mode: "closed" });
     this.initializeComponent();
-}
+  }
 
-private async initializeComponent() {
-  let globalCSS;
-if (this.__config.styleMode !== 'scoped') {
-  globalCSS = await globalStyles;
-}
+  private async initializeComponent() {
+    let globalCSS;
+    if (this.__config.styleMode !== "scoped") {
+      globalCSS = await globalStyles;
+    }
 
-if (this.__config && this.__config.templateUrl) {
-  fetch(this.__config.templateUrl)
-    .then(response => response.text())
-    .then(template => {
-      if (this.__config.styleUrl) {
-        return fetch(this.__config.styleUrl)
-          .then(resp => resp.text())
-          .then(style => {
-            this.__config.style = style;
-            let combinedStyles = this.__config.style || '';
+    if (this.__config && this.__config.templateUrl) {
+      fetch(this.__config.templateUrl)
+        .then((response) => response.text())
+        .then((template) => {
+          if (this.__config.styleUrl) {
+            return fetch(this.__config.styleUrl)
+              .then((resp) => resp.text())
+              .then((style) => {
+                this.__config.style = style;
+                let combinedStyles = this.__config.style || "";
 
-            // If not scoped, prepend globalStyles, then add local after global
-            if (this.__config.styleMode !== 'scoped') {
+                // If not scoped, prepend globalStyles, then add local after global
+                if (this.__config.styleMode !== "scoped") {
+                  combinedStyles = `${combinedStyles}\n${globalCSS}`;
+                }
+
+                this.__config.template = `<style>${combinedStyles}</style>${template}`;
+                this.init();
+              });
+          } else {
+            let combinedStyles = this.__config.style || "";
+            if (this.__config.styleMode !== "scoped") {
               combinedStyles = `${combinedStyles}\n${globalCSS}`;
             }
 
             this.__config.template = `<style>${combinedStyles}</style>${template}`;
             this.init();
-          });
-      } else {
-        let combinedStyles = this.__config.style || '';
-        if (this.__config.styleMode !== 'scoped') {
-          combinedStyles = `${combinedStyles}\n${globalCSS}`;
-        }
-
-        this.__config.template = `<style>${combinedStyles}</style>${template}`;
-        this.init();
+          }
+        });
+    } else if (this.__config && this.__config.template) {
+      let combinedStyles = this.__config.style || "";
+      if (this.__config.styleMode !== "scoped") {
+        combinedStyles = `${combinedStyles}\n${globalCSS}`;
       }
-    });
-} else if (this.__config && this.__config.template) {
-  let combinedStyles = this.__config.style || '';
-  if (this.__config.styleMode !== 'scoped') {
-    combinedStyles = `${combinedStyles}\n${globalCSS}`;
+
+      this.__config.template = `<style>${combinedStyles}</style>${this.__config.template}`;
+      this.init();
+    }
+
+    this.onInit();
   }
-
-  this.__config.template = `<style>${combinedStyles}</style>${this.__config.template}`;
-  this.init();
-}
-
-this.onInit();
-}
 
   disconnectedCallback() {
     this.onDestroy();
@@ -79,7 +79,7 @@ this.onInit();
     this.setupReactiveProperties();
     this.render();
     // Call onInit if defined
-    if (typeof (this as any).onInit === 'function') {
+    if (typeof (this as any).onInit === "function") {
       (this as any).onInit();
     }
   }
@@ -93,10 +93,11 @@ this.onInit();
     const proto = Object.getPrototypeOf(this);
 
     for (const key of Object.keys(this)) {
-      if (typeof this[key] !== 'function' && !key.startsWith('__')) {
+      if (typeof this[key] !== "function" && !key.startsWith("__")) {
         // Get any existing descriptor from the instance or its prototype
-        let descriptor = Object.getOwnPropertyDescriptor(this, key) 
-                      || Object.getOwnPropertyDescriptor(proto, key);
+        let descriptor =
+          Object.getOwnPropertyDescriptor(this, key) ||
+          Object.getOwnPropertyDescriptor(proto, key);
 
         let internalValue = this[key];
 
@@ -110,7 +111,7 @@ this.onInit();
               this.render();
             },
             configurable: true,
-            enumerable: true
+            enumerable: true,
           });
         } else {
           // Existing getters/setters – wrap them
@@ -119,7 +120,7 @@ this.onInit();
 
           const getFn = originalGet || (() => internalValue);
 
-          const setFn = originalSet 
+          const setFn = originalSet
             ? (newVal: any) => {
                 originalSet.call(this, newVal);
                 this.setModel();
@@ -135,7 +136,7 @@ this.onInit();
             get: getFn,
             set: setFn,
             configurable: true,
-            enumerable: true
+            enumerable: true,
           });
         }
       }
@@ -144,13 +145,13 @@ this.onInit();
     // Initialize the model with the current properties
     this.model = {};
     this.setModel();
-    }
+  }
 
-    // Optionally, wrap model in a Proxy if needed for deeper reactivity
+  // Optionally, wrap model in a Proxy if needed for deeper reactivity
 
-  private setModel(){
+  private setModel() {
     for (const key of Object.keys(this)) {
-      if (typeof this[key] !== 'function' && !key.startsWith('__')) {
+      if (typeof this[key] !== "function" && !key.startsWith("__")) {
         this.model[key] = this[key];
       }
     }
@@ -158,63 +159,66 @@ this.onInit();
 
   private scheduleRender(): void {
     if (!this.renderScheduled) {
-        this.renderScheduled = true;
-        requestAnimationFrame(() => {
-            this.render();
-            this.renderScheduled = false;
-        });
+      this.renderScheduled = true;
+      requestAnimationFrame(() => {
+        this.render();
+        this.renderScheduled = false;
+      });
     }
-}
-
-
-private async render() {
-
-  if (!this._shadow) {
-      console.error('Shadow root is not attached.');
-      return;
   }
 
-  const shadow = this._shadow;
+  private async render() {
+    if (!this._shadow) {
+      console.error("Shadow root is not attached.");
+      return;
+    }
 
-  // Render the template into the shadow root using incremental-dom
-  const parser = Parser.sharedInstance();
-  const renderResult = this.template.render(this.getModel(), this) as [string, Binding[]];
-  const [templateString, bindings] = renderResult;
+    const shadow = this._shadow;
 
-  const patchFn = parser.createPatch(templateString);
+    // Render the template into the shadow root using incremental-dom
+    const parser = Parser.sharedInstance();
+    const renderResult = this.template.render(this.getModel(), this) as [
+      string,
+      Binding[],
+    ];
+    const [templateString, bindings] = renderResult;
 
-  try {
+    const patchFn = parser.createPatch(templateString);
+
+    try {
       patchFn(shadow);
 
       // Attach event listeners based on bindings
-      bindings.forEach(binding => {
-          const { eventName, handlerName } = binding;
-          const handler = (this as any)[handlerName];
-          if (typeof handler === 'function') {
-            this._shadow.addEventListener(eventName, handler.bind(this));
-              console.log(`Attached event listener for '${eventName}' to handler '${handlerName}'.`);
-          } else {
-              console.warn(`Handler '${handlerName}' is not a function.`);
-          }
+      bindings.forEach((binding) => {
+        const { eventName, handlerName } = binding;
+        const handler = (this as any)[handlerName];
+        if (typeof handler === "function") {
+          this._shadow.addEventListener(eventName, handler.bind(this));
+          console.log(
+            `Attached event listener for '${eventName}' to handler '${handlerName}'.`,
+          );
+        } else {
+          console.warn(`Handler '${handlerName}' is not a function.`);
+        }
       });
-        
-  } catch (error) {
-      console.error('Render Error:', error);
+    } catch (error) {
+      console.error("Render Error:", error);
+    }
   }
-}
-
 
   static get observedAttributes() {
-    return this.inputs.map(input => toKebabCase(input));
+    return this.inputs.map((input) => toKebabCase(input));
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
     const propName = toCamelCase(name);
-    if ((this.constructor as typeof BaseComponent).inputs && (this.constructor as typeof BaseComponent).inputs.includes(propName)) {
-        (this as any)[propName] = newValue;
+    if (
+      (this.constructor as typeof BaseComponent).inputs &&
+      (this.constructor as typeof BaseComponent).inputs.includes(propName)
+    ) {
+      (this as any)[propName] = newValue;
     }
-}
-
+  }
 
   onInit(): void {
     // Optionally override this method

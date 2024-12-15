@@ -1,8 +1,7 @@
-import { Component, BaseComponent } from 'fornax/core';
-
+import { Component, BaseComponent } from "fornax/core";
 
 @Component({
-  selector: 'app-component',
+  selector: "app-component",
   style: `nav { margin-left: 3em; margin-right: 3em; }
           .container { text-align: center; }`,
   template: `
@@ -16,9 +15,8 @@ import { Component, BaseComponent } from 'fornax/core';
       </ul>
     </nav>
     <div class="container">
-    <router-outlet></router-outlet>
+      <router-outlet></router-outlet>
     </div>
-  `
+  `,
 })
-export class AppComponent extends BaseComponent {
-}
+export class AppComponent extends BaseComponent {}

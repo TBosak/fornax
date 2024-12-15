@@ -1,7 +1,7 @@
-import { Component, BaseComponent } from 'fornax/core';
+import { Component, BaseComponent } from "fornax/core";
 
 @Component({
-  selector: 'app-other',
+  selector: "app-other",
   template: `
     <h1>Other Page</h1>
     <p>This is the other page, accessible at "/other".</p>
@@ -9,7 +9,6 @@ import { Component, BaseComponent } from 'fornax/core';
   style: `
     h1 { color: green !important; }
     p { font-family: sans-serif; }
-  `
+  `,
 })
-  export class Other extends BaseComponent {
-  }
+export class Other extends BaseComponent {}

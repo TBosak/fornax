@@ -1,6 +1,6 @@
 import { serve } from "bun";
-import { existsSync, mkdirSync } from 'fs';
-import path from 'path';
+import { existsSync, mkdirSync } from "fs";
+import path from "path";
 import { loadConfig } from "./load-config";
 
 // Define the directory paths
@@ -12,9 +12,13 @@ if (!existsSync(config.distDir)) {
   mkdirSync(config.distDir);
 }
 
-const buildProc = Bun.spawn(["bun", `${__dirname}/build.ts`],{stdout: "inherit"});
+const buildProc = Bun.spawn(["bun", `${__dirname}/build.ts`], {
+  stdout: "inherit",
+});
 await buildProc.exited;
-const liveReloadProc = Bun.spawn(["bun", `${__dirname}/live-reload.ts`],{stdout: "inherit"});
+const liveReloadProc = Bun.spawn(["bun", `${__dirname}/live-reload.ts`], {
+  stdout: "inherit",
+});
 
 // Function to serve static files
 async function serveStatic(filePath: string): Promise<any> {
@@ -34,25 +38,25 @@ async function serveStatic(filePath: string): Promise<any> {
 // Function to determine Content-Type based on file extension
 function getContentType(ext: string): string {
   switch (ext) {
-    case '.html':
-      return 'text/html';
-    case '.js':
-      return 'application/javascript';
-    case '.ts':
-      return 'application/typescript';
-    case '.css':
-      return 'text/css';
-    case '.json':
-      return 'application/json';
-    case '.png':
-      return 'image/png';
-    case '.jpg':
-    case '.jpeg':
-      return 'image/jpeg';
-    case '.gif':
-      return 'image/gif';
+    case ".html":
+      return "text/html";
+    case ".js":
+      return "application/javascript";
+    case ".ts":
+      return "application/typescript";
+    case ".css":
+      return "text/css";
+    case ".json":
+      return "application/json";
+    case ".png":
+      return "image/png";
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
+    case ".gif":
+      return "image/gif";
     default:
-      return 'application/octet-stream';
+      return "application/octet-stream";
   }
 }
 
@@ -72,14 +76,14 @@ serve({
     let filePath = path.join(config.distDir, pathname);
 
     // If the path is a directory, append 'index.html'
-    if (pathname.endsWith('/')) {
-      filePath = path.join(filePath, 'index.html');
+    if (pathname.endsWith("/")) {
+      filePath = path.join(filePath, "index.html");
     }
 
     // Check if the file exists
     if (existsSync(filePath) && !path.extname(filePath)) {
       // If no extension, assume it's a directory and append 'index.html'
-      filePath = path.join(filePath, 'index.html');
+      filePath = path.join(filePath, "index.html");
     }
 
     // Serve the file if it exists
@@ -87,7 +91,7 @@ serve({
       return await serveStatic(filePath);
     } else {
       // For SPA routes, serve 'index.html'
-      const indexPath = path.join(config.distDir, 'index.html');
+      const indexPath = path.join(config.distDir, "index.html");
       if (existsSync(indexPath)) {
         return await serveStatic(indexPath);
       } else {
