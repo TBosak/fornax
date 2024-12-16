@@ -1,6 +1,7 @@
 import { Emitter } from "./Emitter";
-import { DependencyContainer } from "./DependencyContainer";
-import { ComponentConfig, ServiceOptions } from "./Models";
+import { ComponentConfig } from "./Models";
+import { Context } from "./Context";
+
 import "reflect-metadata";
 
 export function Component(config: ComponentConfig) {
@@ -10,25 +11,18 @@ export function Component(config: ComponentConfig) {
       __config = config;
 
       constructor(...args: any[]) {
-        // Resolve dependencies before passing them to the original constructor
-        const dependencies =
-          Reflect.getMetadata("design:paramtypes", target) || [];
-        const injections = dependencies.map((dep: any) =>
-          DependencyContainer.getInstance().resolve(dep)
-        );
-
-        super(...injections);
+        super(...args);
       }
     };
 
     // Define the custom element using the provided selector from config
-    if (!customElements.get(config.selector)) {
+    if (customElements.get(config.selector)) {
+      // The custom element is defined
+    } else {
+      // The custom element is not defined
       customElements.define(config.selector, customElementClass);
     }
-
-    // Attach selector metadata for potential future use
     target["selector"] = config.selector;
-
     // Return the newly extended and defined class
     return customElementClass;
   };
@@ -81,34 +75,11 @@ export function Output() {
   };
 }
 
-export function Service(options?: ServiceOptions) {
+export function Service(key: string) {
   return function <T extends { new (...args: any[]): {} }>(constructor: T) {
-    Reflect.defineMetadata(
-      "singleton",
-      options?.singleton ?? false,
-      constructor
-    );
+    const serviceKey = key;
 
-    if (options?.singleton) {
-      const serviceName = constructor.name;
-      DependencyContainer.getInstance().registerSingleton(
-        constructor,
-        serviceName
-      );
-    } else {
-      // Ensure the service is injectable even if not singleton
-      const originalConstructor = constructor;
-      function InjectableService(...args: any[]) {
-        const dependencies =
-          Reflect.getMetadata("design:paramtypes", originalConstructor) || [];
-        const injections = dependencies.map((dependency: any) =>
-          DependencyContainer.getInstance().resolve(dependency)
-        );
-        return new originalConstructor(...injections);
-      }
-      InjectableService.prototype = originalConstructor.prototype;
-      Reflect.defineMetadata("injectable", true, InjectableService);
-      return InjectableService as unknown as T;
-    }
+    // Register the service instance in the Context
+    Context.provide(serviceKey, new constructor());
   };
 }

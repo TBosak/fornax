@@ -7,13 +7,17 @@ const config = loadConfig();
 
 try {
   const componentsDir = resolve(config.srcDir, "./app/components");
+  const servicesDir = resolve(config.srcDir, "./app/services");
   const srcDir = resolve(config.srcDir);
   const srcFiles = readdirSync(config.srcDir);
   const componentFiles = readdirSync(componentsDir);
+  const serviceFiles = readdirSync(servicesDir);
   const imports =
     getImportPaths(componentFiles, componentsDir) +
     "\n" +
-    getImportPaths(srcFiles, srcDir);
+    getImportPaths(srcFiles, srcDir) +
+    "\n" +
+    getImportPaths(serviceFiles, servicesDir);
   function getImportPaths(files: string[], dir: string): string {
     return files
       .filter((file: any) => {
@@ -21,7 +25,10 @@ try {
         return (ext === ".ts" || ext === ".tsx") && !file.endsWith("main.ts");
       })
       .map((file: any) => {
-        const importPath = `${dir.replaceAll("\\", "/")}/${basename(file, extname(file))}`;
+        const importPath = `${dir.replaceAll("\\", "/")}/${basename(
+          file,
+          extname(file)
+        )}`;
         return `import "${importPath}";`;
       })
       .join("\n");
@@ -46,7 +53,7 @@ try {
 
   copyFolderRecursiveSync(
     join(config.srcDir, "assets"),
-    join(config.distDir, "assets"),
+    join(config.distDir, "assets")
   );
 
   if (build.logs.length) {
