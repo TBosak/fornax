@@ -19,14 +19,13 @@ Fornax is a lightweight, opinionated, Angular-inspired, and Bun-powered web fram
 ### Prerequisites
 
 - **Bun:** Install Bun from [https://bun.sh/](https://bun.sh/)
-- **TypeScript:**
   
 ### Installation
 
 Add Fornax to your existing Bun project:
 
 ```bash
-bun add fornax
+bun add fornaxjs
 ```
 
 Create a `fornax.config.js` in your project’s root to configure directories and ports:
