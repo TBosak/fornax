@@ -1,6 +1,6 @@
 {
-  "name": "fornax",
-  "module": "index.ts",
+  "name": "fornaxjs",
+  "version": "0.0.1",
   "type": "module",
   "bin": {
     "fnx": "bun run ./core/scripts/cli.ts --silent=false"

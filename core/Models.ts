@@ -23,3 +23,7 @@ export class ComponentConfig {
   template?: string;
   styleMode: "scoped" | "global" = "global";
 }
+
+export interface ServiceOptions {
+  singleton?: boolean;
+}

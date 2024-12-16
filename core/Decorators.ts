@@ -1,6 +1,6 @@
-import { ComponentConfig } from "./Component";
 import { Emitter } from "./Emitter";
 import { DependencyContainer } from "./DependencyContainer";
+import { ComponentConfig, ServiceOptions } from "./Models";
 import "reflect-metadata";
 
 export function Component(config: ComponentConfig) {
@@ -75,24 +75,20 @@ export function Output() {
   };
 }
 
-interface ServiceOptions {
-  singleton?: boolean;
-}
-
 export function Service(options?: ServiceOptions) {
   return function <T extends { new (...args: any[]): {} }>(constructor: T) {
     // Define metadata for singleton flag
     Reflect.defineMetadata(
       "singleton",
       options?.singleton ?? false,
-      constructor,
+      constructor
     );
 
     if (options?.singleton) {
       const serviceName = constructor.name;
       DependencyContainer.getInstance().registerSingleton(
         constructor,
-        serviceName,
+        serviceName
       );
     }
   };
