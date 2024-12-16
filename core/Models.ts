@@ -21,7 +21,7 @@ export class ComponentConfig {
   styleUrl?: string;
   style?: string;
   template?: string;
-  styleMode: "scoped" | "global" = "global";
+  styleMode?: "scoped" | "global" = "global";
 }
 
 export interface ServiceOptions {

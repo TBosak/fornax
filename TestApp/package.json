@@ -9,6 +9,6 @@
   },
   "peerDependencies": {
     "typescript": "^5.0.0",
-    "fornax": "link:fornax"
+    "fornaxjs": "link:fornaxjs"
   }
 }
