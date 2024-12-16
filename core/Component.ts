@@ -13,10 +13,6 @@ export class BaseComponent extends HTMLElement {
   private _shadow: ShadowRoot; // Private reference to the closed shadow root
   private renderScheduled: boolean = false;
 
-  constructor() {
-    super();
-  }
-
   connectedCallback() {
     this._shadow = this.attachShadow({ mode: "closed" });
     this.initializeComponent();
@@ -179,7 +175,7 @@ export class BaseComponent extends HTMLElement {
     const parser = Parser.sharedInstance();
     const renderResult = this.template.render(this.getModel(), this) as [
       string,
-      Binding[],
+      Binding[]
     ];
     const [templateString, bindings] = renderResult;
 
@@ -195,7 +191,7 @@ export class BaseComponent extends HTMLElement {
         if (typeof handler === "function") {
           this._shadow.addEventListener(eventName, handler.bind(this));
           console.log(
-            `Attached event listener for '${eventName}' to handler '${handlerName}'.`,
+            `Attached event listener for '${eventName}' to handler '${handlerName}'.`
           );
         } else {
           console.warn(`Handler '${handlerName}' is not a function.`);

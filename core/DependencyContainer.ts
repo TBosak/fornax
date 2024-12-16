@@ -1,44 +1,34 @@
 export class DependencyContainer {
   private static instance: DependencyContainer;
-  private singletons: Map<Function, any> = new Map();
+  private providers = new Map();
 
-  private constructor() {}
-
-  /**
-   * Retrieves the singleton instance of DependencyContainer.
-   */
   static getInstance(): DependencyContainer {
-    if (!DependencyContainer.instance) {
-      DependencyContainer.instance = new DependencyContainer();
+    if (!this.instance) {
+      this.instance = new DependencyContainer();
     }
-    return DependencyContainer.instance;
+    return this.instance;
   }
 
-  /**
-   * Registers a singleton service.
-   * @param constructor The service class constructor.
-   * @param serviceName The unique name of the service.
-   */
   registerSingleton<T>(
-    constructor: { new (...args: any[]): T },
-    serviceName: string,
-  ): void {
-    if (!this.singletons.has(constructor)) {
-      const instance = new constructor();
-      this.singletons.set(constructor, instance);
+    constructor: new (...args: any[]) => T,
+    serviceName: string
+  ) {
+    if (!this.providers.has(serviceName)) {
+      const instance = this.resolve(constructor);
+      this.providers.set(serviceName, instance);
     }
   }
 
-  /**
-   * Retrieves a singleton instance of a service.
-   * @param constructor The service class constructor.
-   * @returns The singleton instance.
-   */
-  getSingleton<T>(constructor: { new (...args: any[]): T }): T {
-    const instance = this.singletons.get(constructor);
-    if (!instance) {
-      throw new Error(`Singleton service ${constructor.name} not found.`);
-    }
-    return instance;
+  resolve<T>(constructor: new (...args: any[]) => T): T {
+    const dependencies =
+      Reflect.getMetadata("design:paramtypes", constructor) || [];
+    const injections = dependencies.map((dependency: any) =>
+      this.resolve(dependency)
+    );
+    return new constructor(...injections);
+  }
+
+  get<T>(serviceName: string): T | null {
+    return this.providers.get(serviceName) || null;
   }
 }
