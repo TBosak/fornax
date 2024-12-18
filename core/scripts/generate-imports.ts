@@ -2,10 +2,13 @@ import { readdirSync, rmSync, writeFileSync } from "fs";
 import { basename, extname, join, resolve } from "path";
 import { loadConfig } from "./load-config";
 import { copyFolderRecursiveSync } from "../Utilities";
+import styleLoader from "bun-style-loader";
 
 const config = loadConfig();
 
 try {
+  const args = process.argv.slice(2);
+  const initialLoad = args[0] === "true" || false;
   clearChunks(config.distDir);
   const componentsDir = resolve(config.srcDir, "./app/components");
   const servicesDir = resolve(config.srcDir, "./app/services");
@@ -46,15 +49,18 @@ try {
     outdir: config.distDir,
     target: "browser",
     splitting: true,
+    plugins: [styleLoader()],
     naming: {
       entry: "[name].[ext]",
     },
   });
 
-  copyFolderRecursiveSync(
-    join(config.srcDir, "assets"),
-    join(config.distDir, "assets")
-  );
+  if (initialLoad) {
+    copyFolderRecursiveSync(
+      join(config.srcDir, "assets"),
+      join(config.distDir, "assets")
+    );
+  }
 
   if (build.logs.length) {
     console.log(build.logs);

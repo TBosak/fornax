@@ -23,10 +23,12 @@
   "exports": {
     ".": {
       "import": "./index.ts",
-      "types": "./build/release.d.ts"
+      "types": ["./build/release.d.ts", "./core.d.ts"]
     }
   },
   "devDependencies": {
-    "assemblyscript": "^0.27.31"
+    "assemblyscript": "^0.27.31",
+    "bun-style-loader": "^0.4.0",
+    "sass": "^1.83.0"
   }
 }

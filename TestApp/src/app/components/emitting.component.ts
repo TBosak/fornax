@@ -5,17 +5,13 @@ import {
   EventEmitter,
   Output,
 } from "fornaxjs";
+import html from "./emitting.component.html" with { type: "text" };
+import styles from "./emitting.component.css";
 
 @Component({
   selector: "app-emitting",
-  template: `
-    <h2>Output Decorator Testing</h2>
-    <button id="clickMe">Click me!</button>
-  `,
-  style: `
-    h1 { color: green !important; }
-    p { font-family: sans-serif; }
-  `,
+  template: html,
+  style: styles,
 })
 export class Emitting extends BaseComponent {
   @ViewChild("#clickMe") clickMe!: HTMLButtonElement;
@@ -23,6 +19,7 @@ export class Emitting extends BaseComponent {
 
   onInit(): void {
     this.clickMe?.addEventListener("click", this.handleClick.bind(this));
+    console.log(this.clickMe);
   }
 
   handleClick(): void {

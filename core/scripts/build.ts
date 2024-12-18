@@ -11,8 +11,15 @@ const config = loadConfig();
     }
   });
 
-  const childProc = Bun.spawn(["bun", `${__dirname}/generate-imports.ts`], {
-    stdout: "inherit",
-  });
+  const initialLoad = true;
+  const childProc = Bun.spawn(
+    ["bun", `${__dirname}/generate-imports.ts`, String(initialLoad)],
+    {
+      cwd: process.cwd(),
+      env: process.env,
+      stdout: "inherit",
+      stderr: "inherit",
+    }
+  );
   await childProc.exited;
 })();
