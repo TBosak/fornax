@@ -2,7 +2,7 @@
   
 <img width="150px" src="https://github.com/user-attachments/assets/cbe98a21-31f1-4209-af64-8a43f058f3cf">
 <h1>Fornax</h1>
-Fornax is a lightweight, opinionated, Angular-inspired, and Bun-powered web framework designed to simplify building single-page applications with custom components, routing, and flexible styling options.
+Fornax is a lightweight, opinionated, and Bun-powered web framework designed to simplify building single-page applications with custom components, routing, and flexible styling options.
 </div>
 
 **Key Features:**
