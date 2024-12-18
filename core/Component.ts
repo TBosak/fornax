@@ -66,8 +66,8 @@ export class BaseComponent extends HTMLElement {
       if (this.__config.styleMode !== "scoped") {
         combinedStyles = `${combinedStyles}\n${globalCSS}`;
       }
-
-      this.__config.template = `<style>${combinedStyles}</style>${this.__config.template}`;
+      this.__config.style = combinedStyles;
+      this.__config.template = `${this.__config.template}`;
       this.init();
     }
   }
@@ -190,7 +190,7 @@ export class BaseComponent extends HTMLElement {
     }
   
     const shadow = this._shadow;
-  
+
     // Render the template into the shadow root
     const parser = Parser.sharedInstance();
     const renderResult = this.template.render(this.model, this) as [
@@ -200,10 +200,11 @@ export class BaseComponent extends HTMLElement {
     const [templateString, bindings] = renderResult;
   
     const patchFn = parser.createPatch(templateString);
-  
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(this.__config.style || "");
+    this._shadow.adoptedStyleSheets = [sheet];
     try {
-      patchFn(shadow);
-  
+      patchFn(shadow);  
       // Attach event listeners to the host element instead of child elements
       bindings.forEach(({ eventName, handlerName }) => {
         this.addEventListener(eventName, (event: CustomEvent) => {

@@ -27,6 +27,11 @@ async function instantiate(module, imports = {}) {
       str = __lowerString(str) || __notnull();
       return __liftString(exports.toCamelCase(str) >>> 0);
     },
+    minifyCSS(css) {
+      // assembly/utilities/minifyCSS(~lib/string/String) => ~lib/string/String
+      css = __lowerString(css) || __notnull();
+      return __liftString(exports.minifyCSS(css) >>> 0);
+    },
   }, exports);
   function __liftString(pointer) {
     if (!pointer) return null;
@@ -57,6 +62,7 @@ export const {
   memory,
   toKebabCase,
   toCamelCase,
+  minifyCSS,
 } = await (async url => instantiate(
   await (async () => {
     const isNodeOrBun = typeof process != "undefined" && process.versions != null && (process.versions.node != null || process.versions.bun != null);

@@ -12,3 +12,9 @@ export declare function toKebabCase(str: string): string;
  * @returns `~lib/string/String`
  */
 export declare function toCamelCase(str: string): string;
+/**
+ * assembly/utilities/minifyCSS
+ * @param css `~lib/string/String`
+ * @returns `~lib/string/String`
+ */
+export declare function minifyCSS(css: string): string;

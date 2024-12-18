@@ -6,7 +6,7 @@ import {
   copyFileSync,
 } from "fs";
 import path from "path";
-import { toCamelCase, toKebabCase } from "../build/release";
+import { toCamelCase, toKebabCase, minifyCSS } from "../build/release";
 
 export function ensureObject(o: any): object {
   return o != null && typeof o === "object" ? o : {};
@@ -65,4 +65,4 @@ export function copyFolderRecursiveSync(src, dest) {
   }
 }
 
-export { toCamelCase, toKebabCase };
+export { toCamelCase, toKebabCase, minifyCSS };
