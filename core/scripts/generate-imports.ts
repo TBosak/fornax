@@ -1,4 +1,4 @@
-import { readdirSync, writeFileSync } from "fs";
+import { readdirSync, rmSync, writeFileSync } from "fs";
 import { basename, extname, join, resolve } from "path";
 import { loadConfig } from "./load-config";
 import { copyFolderRecursiveSync } from "../Utilities";
@@ -6,6 +6,7 @@ import { copyFolderRecursiveSync } from "../Utilities";
 const config = loadConfig();
 
 try {
+  clearChunks(config.distDir);
   const componentsDir = resolve(config.srcDir, "./app/components");
   const servicesDir = resolve(config.srcDir, "./app/services");
   const srcDir = resolve(config.srcDir);
@@ -61,4 +62,19 @@ try {
   }
 } catch (e) {
   console.error(e);
+}
+
+function clearChunks(distDir: string) {
+  try {
+    const files = readdirSync(distDir);
+    const chunkRegex = /^chunk-.*\.js$/;
+    for (const file of files) {
+      if (chunkRegex.test(file)) {
+        const filePath = join(distDir, file);
+        rmSync(filePath, { force: true });
+      }
+    }
+  } catch (error) {
+    console.error(`Error clearing chunks in ${distDir}:`, error);
+  }
 }
