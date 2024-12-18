@@ -1,4 +1,4 @@
-import { RouterOutlet, Component } from "fornaxjs";
+import { addRouter } from "fornaxjs";
 import { HelloWorld } from "./app/components/hello-world.component";
 import { Other } from "./app/components/other.component";
 
@@ -7,12 +7,4 @@ export const routes: any[] = [
   { path: "/other", component: Other },
 ];
 
-@Component({
-  selector: "router-outlet",
-  template: `<slot></slot>`,
-})
-export class AppRouterOutlet extends RouterOutlet {
-  constructor() {
-    super(routes);
-  }
-}
+addRouter("router-outlet", routes);

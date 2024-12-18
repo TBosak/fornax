@@ -1,4 +1,4 @@
-import * as wasm from './build/release.js';
+import * as wasm from "./build/release.js";
 import { BaseComponent } from "./core/Component.js";
 import {
   Component,
@@ -9,7 +9,7 @@ import {
   ViewChildren,
 } from "./core/Decorators";
 import { EventEmitter } from "./core/EventEmitter.js";
-import { RouterOutlet } from "./core/Routing.js";
+import { RouterOutlet, addRouter } from "./core/Routing.js";
 import { Context } from "./core/Context.js";
 
 export {
@@ -23,5 +23,6 @@ export {
   RouterOutlet,
   Service,
   Context,
-  wasm
+  wasm,
+  addRouter,
 };
