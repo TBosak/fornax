@@ -6,6 +6,7 @@ import {
   copyFileSync,
 } from "fs";
 import path from "path";
+import { toCamelCase, toKebabCase } from "../build/release";
 
 export function ensureObject(o: any): object {
   return o != null && typeof o === "object" ? o : {};
@@ -42,14 +43,6 @@ export function makeSafeObject(o: any, visited = new WeakSet()): any {
   return safeObj;
 }
 
-export function toKebabCase(str: string): string {
-  return str.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
-}
-
-export function toCamelCase(str: string): string {
-  return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
-}
-
 export function copyFolderRecursiveSync(src, dest) {
   const exists = existsSync(dest);
   if (!exists) {
@@ -71,3 +64,5 @@ export function copyFolderRecursiveSync(src, dest) {
     }
   }
 }
+
+export { toCamelCase, toKebabCase };

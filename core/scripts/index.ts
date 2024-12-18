@@ -6,6 +6,7 @@ import { loadConfig } from "./load-config";
 // Define the directory paths
 const config = loadConfig();
 const rootDir = process.cwd();
+const backupDir = path.resolve(__dirname, "../../build"); // Define backup directory
 
 // Ensure the dist directory exists
 if (!existsSync(config.distDir)) {
@@ -55,6 +56,8 @@ function getContentType(ext: string): string {
       return "image/jpeg";
     case ".gif":
       return "image/gif";
+    case ".wasm":
+      return "application/wasm";
     default:
       return "application/octet-stream";
   }
@@ -72,7 +75,7 @@ serve({
       return new Response("Forbidden", { status: 403 });
     }
 
-    // Define the path to the requested file
+    // Define the path to the requested file in the primary directory
     let filePath = path.join(config.distDir, pathname);
 
     // If the path is a directory, append 'index.html'
@@ -80,24 +83,24 @@ serve({
       filePath = path.join(filePath, "index.html");
     }
 
-    // Check if the file exists
-    if (existsSync(filePath) && !path.extname(filePath)) {
-      // If no extension, assume it's a directory and append 'index.html'
-      filePath = path.join(filePath, "index.html");
-    }
-
-    // Serve the file if it exists
+    // Check if the file exists in the primary directory
     if (existsSync(filePath) && path.extname(filePath)) {
       return await serveStatic(filePath);
-    } else {
-      // For SPA routes, serve 'index.html'
-      const indexPath = path.join(config.distDir, "index.html");
-      if (existsSync(indexPath)) {
-        return await serveStatic(indexPath);
-      } else {
-        return new Response("Not Found", { status: 404 });
-      }
     }
+
+    // Check if the file exists in the backup directory
+    const backupFilePath = path.join(backupDir, pathname);
+    if (existsSync(backupFilePath) && path.extname(backupFilePath)) {
+      return await serveStatic(backupFilePath);
+    }
+
+    // For SPA routes, serve 'index.html'
+    const indexPath = path.join(config.distDir, "index.html");
+    if (existsSync(indexPath)) {
+      return await serveStatic(indexPath);
+    }
+
+    return new Response("Not Found", { status: 404 });
   },
 });
 

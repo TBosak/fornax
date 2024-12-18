@@ -8,6 +8,7 @@
     "allowJs": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "declaration": true,
 
     // Bundler mode
     "moduleResolution": "bundler",

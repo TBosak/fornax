@@ -1,4 +1,4 @@
-import { Component, BaseComponent } from "fornax/core";
+import { Component, BaseComponent } from "fornaxjs";
 
 @Component({
   selector: "app-component",

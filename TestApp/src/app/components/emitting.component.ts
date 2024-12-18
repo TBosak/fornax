@@ -4,7 +4,7 @@ import {
   ViewChild,
   EventEmitter,
   Output,
-} from "fornax/core";
+} from "fornaxjs";
 
 @Component({
   selector: "app-emitting",

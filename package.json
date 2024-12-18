@@ -6,7 +6,7 @@
     "fnx": "bun run ./core/scripts/cli.ts --silent=false"
   },
   "scripts": {
-    "start": "bun run index.ts"
+    "asbuild": "asc assembly/*.ts --target release"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -19,5 +19,14 @@
     "parse5": "^7.2.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.ts",
+      "types": "./build/release.d.ts"
+    }
+  },
+  "devDependencies": {
+    "assemblyscript": "^0.27.31"
   }
 }

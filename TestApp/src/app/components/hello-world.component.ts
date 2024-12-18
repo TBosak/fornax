@@ -1,4 +1,4 @@
-import { Component, BaseComponent, Context } from "fornax/core";
+import { Component, BaseComponent, Context } from "fornaxjs";
 import { ApiService } from "../services/api.service";
 
 @Component({

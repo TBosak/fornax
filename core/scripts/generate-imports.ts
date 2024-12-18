@@ -46,7 +46,6 @@ try {
     outdir: config.distDir,
     target: "browser",
     splitting: true,
-    minify: true,
     naming: {
       entry: "[name].[ext]",
     },

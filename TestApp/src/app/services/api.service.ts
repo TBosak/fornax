@@ -1,4 +1,4 @@
-import { Service } from "fornax/core";
+import { Service } from "fornaxjs";
 
 @Service("ApiService")
 export class ApiService {
