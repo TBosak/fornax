@@ -1,6 +1,6 @@
 {
   "name": "fornaxjs",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "bin": {
     "fnx": "bun run ./core/scripts/cli.ts --silent=false"
@@ -18,7 +18,10 @@
     "incremental-dom": "^0.7.0",
     "parse5": "^7.2.1",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "bun-style-loader": "^0.4.0",
+    "sass": "^1.83.0"
+
   },
   "exports": {
     ".": {
@@ -27,8 +30,6 @@
     }
   },
   "devDependencies": {
-    "assemblyscript": "^0.27.31",
-    "bun-style-loader": "^0.4.0",
-    "sass": "^1.83.0"
+    "assemblyscript": "^0.27.31"
   }
 }
