@@ -31,8 +31,10 @@ watch(srcDir, { recursive: true }, async (event, filename) => {
     console.log(`Copied ${srcFilePath} to ${destFilePath}`);
   }
 
-  const childProc = Bun.spawn(["bun", `${__dirname}/generate-imports.ts`], {
-    stdout: "inherit",
-  });
-  await childProc.exited;
+  if (filename.endsWith(".ts") || filename.endsWith(".js") || filename.endsWith(".jsx") || filename.endsWith(".tsx")) {
+    const childProc = Bun.spawn(["bun", `${__dirname}/generate-imports.ts`], {
+      stdout: "inherit",
+    });
+    await childProc.exited;
+  }
 });

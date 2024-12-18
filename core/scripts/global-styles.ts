@@ -1,14 +1,24 @@
 import { minifyCSS } from "../Utilities";
 
-const globalStyles: Promise<string> = (async () => {
+const globalStyles = (async() => {
+  let styles = "";
+  const styleSheets = document.adoptedStyleSheets;
+  let cssText = "";
   const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
-  const cssContents = await Promise.all(
-    links.map((link) =>
-      fetch((link as HTMLLinkElement).href).then((r) => r.text()),
-    ),
-  );
-  const cssResult = minifyCSS(cssContents.join("\n"));
-  return cssResult;
+  //fetch any stylesheets from links that don't exist in styleSheets array hrefs
+  const fetches = links
+    .filter((link) => !styleSheets.find((sheet) => sheet.href === (link as HTMLLinkElement).href))
+    .map((link) => fetch((link as HTMLLinkElement).href).then((res) => res.text()));
+  for (const sheet of styleSheets) {
+    for (let i = 0; i < sheet.cssRules.length; i++) {
+      cssText += sheet.cssRules[i].cssText + "\n";
+    }
+  }
+  await Promise.all(fetches).then((texts) => {
+    cssText += texts.join("\n");
+    styles = minifyCSS(cssText);
+  });
+  return styles;
 })();
 
 export { globalStyles };
