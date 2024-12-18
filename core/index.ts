@@ -1,6 +1,13 @@
 import { BaseComponent } from "./Component";
-import { Component, Input, Output, Service } from "./Decorators";
-import { Emitter } from "./Emitter";
+import {
+  Component,
+  Input,
+  Output,
+  Service,
+  ViewChild,
+  ViewChildren,
+} from "./Decorators";
+import { EventEmitter } from "./EventEmitter";
 import { RouterOutlet } from "./Routing";
 import { Context } from "./Context";
 
@@ -9,7 +16,9 @@ export {
   Component,
   Input,
   Output,
-  Emitter,
+  ViewChild,
+  ViewChildren,
+  EventEmitter,
   RouterOutlet,
   Service,
   Context,

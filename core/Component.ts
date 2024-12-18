@@ -10,12 +10,20 @@ export class BaseComponent extends HTMLElement {
   model: any;
   static inputs: string[] = [];
   static outputs: string[] = [];
-  private _shadow: ShadowRoot; // Private reference to the closed shadow root
+  private _shadow: ShadowRoot;
   private renderScheduled: boolean = false;
+  private reactivePropsCache = new Map<string, string[]>();
 
   connectedCallback() {
-    this._shadow = this.attachShadow({ mode: "closed" });
+    this._shadow = this.attachShadow({ mode: "open" });
     this.initializeComponent();
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        if (typeof this.onInit === "function") {
+          this.onInit();
+        }
+      });
+    }, 0);
   }
 
   private async initializeComponent() {
@@ -62,8 +70,6 @@ export class BaseComponent extends HTMLElement {
       this.__config.template = `<style>${combinedStyles}</style>${this.__config.template}`;
       this.init();
     }
-
-    this.onInit();
   }
 
   disconnectedCallback() {
@@ -80,65 +86,79 @@ export class BaseComponent extends HTMLElement {
     }
   }
 
-  protected getModel(): object {
-    // Return the proxied model
-    return this.model;
+  private extractTemplateProperties(template: string): string[] {
+    if (this.reactivePropsCache.has(template)) {
+      return this.reactivePropsCache.get(template)!;
+    }
+
+    const propertyRegex = /{{\s*([a-zA-Z0-9_]+)\s*}}/g;
+    const matches = new Set<string>();
+
+    let match;
+    while ((match = propertyRegex.exec(template)) !== null) {
+      matches.add(match[1]);
+    }
+
+    const props = Array.from(matches);
+    this.reactivePropsCache.set(template, props);
+    return props;
   }
 
   private setupReactiveProperties(): void {
+    if (!this.__config?.template) {
+      console.warn("Template not defined for this component.");
+      return;
+    }
+
+    const reactiveProps = this.extractTemplateProperties(
+      this.__config.template
+    );
     const proto = Object.getPrototypeOf(this);
 
-    for (const key of Object.keys(this)) {
+    reactiveProps.forEach((key) => {
       if (typeof this[key] !== "function" && !key.startsWith("__")) {
-        // Get any existing descriptor from the instance or its prototype
-        let descriptor =
+        let internalValue = this[key];
+
+        const descriptor =
           Object.getOwnPropertyDescriptor(this, key) ||
           Object.getOwnPropertyDescriptor(proto, key);
 
-        let internalValue = this[key];
-
         if (!descriptor || (!descriptor.get && !descriptor.set)) {
-          // No existing getters/setters – define them
           Object.defineProperty(this, key, {
             get: () => internalValue,
             set: (newVal) => {
-              internalValue = newVal;
-              this.setModel();
-              this.render();
+              if (internalValue !== newVal) {
+                internalValue = newVal;
+                this.setModel();
+                this.scheduleRender();
+              }
             },
             configurable: true,
             enumerable: true,
           });
         } else {
-          // Existing getters/setters – wrap them
           const originalGet = descriptor.get;
           const originalSet = descriptor.set;
 
-          const getFn = originalGet || (() => internalValue);
-
-          const setFn = originalSet
-            ? (newVal: any) => {
-                originalSet.call(this, newVal);
-                this.setModel();
-                this.scheduleRender();
-              }
-            : (newVal: any) => {
-                internalValue = newVal;
-                this.setModel();
-                this.scheduleRender();
-              };
-
           Object.defineProperty(this, key, {
-            get: getFn,
-            set: setFn,
+            get: originalGet || (() => internalValue),
+            set: (newVal) => {
+              if (originalSet) {
+                originalSet.call(this, newVal);
+              } else {
+                internalValue = newVal;
+              }
+              this.setModel();
+              this.scheduleRender();
+            },
             configurable: true,
             enumerable: true,
           });
         }
       }
-    }
+    });
 
-    // Initialize the model with the current properties
+    // Initialize the model once
     this.model = {};
     this.setModel();
   }
@@ -168,39 +188,43 @@ export class BaseComponent extends HTMLElement {
       console.error("Shadow root is not attached.");
       return;
     }
-
+  
     const shadow = this._shadow;
-
-    // Render the template into the shadow root using incremental-dom
+  
+    // Render the template into the shadow root
     const parser = Parser.sharedInstance();
-    const renderResult = this.template.render(this.getModel(), this) as [
+    const renderResult = this.template.render(this.model, this) as [
       string,
       Binding[]
     ];
     const [templateString, bindings] = renderResult;
-
+  
     const patchFn = parser.createPatch(templateString);
-
+  
     try {
       patchFn(shadow);
-
-      // Attach event listeners based on bindings
-      bindings.forEach((binding) => {
-        const { eventName, handlerName } = binding;
-        const handler = (this as any)[handlerName];
-        if (typeof handler === "function") {
-          this._shadow.addEventListener(eventName, handler.bind(this));
-          console.log(
-            `Attached event listener for '${eventName}' to handler '${handlerName}'.`
-          );
-        } else {
-          console.warn(`Handler '${handlerName}' is not a function.`);
-        }
+  
+      // Attach event listeners to the host element instead of child elements
+      bindings.forEach(({ eventName, handlerName }) => {
+        this.addEventListener(eventName, (event: CustomEvent) => {
+          const handler = (this as any)[handlerName];
+          if (typeof handler === "function") {
+            console.log("Event handler:", handlerName);
+            console.log("Event detail:", event.detail);
+            handler.call(this, event);
+          } else {
+            console.warn(
+              `Handler '${handlerName}' is not defined in component:`,
+              this
+            );
+          }
+        });
       });
     } catch (error) {
       console.error("Render Error:", error);
     }
   }
+  
 
   static get observedAttributes() {
     return this.inputs.map((input) => toKebabCase(input));
