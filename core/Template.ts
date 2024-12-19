@@ -2,59 +2,75 @@ import { Binding } from "./Models";
 import { ensureObject, makeSafeObject } from "./Utilities";
 
 export class Template {
+  private static cache = new Map<
+    string,
+    (data: any, scope: any) => [string, Binding[]]
+  >();
+
   public source: string | Function | null = null;
   public render: (data?: any, scope?: any) => [string, Binding[]] = null;
 
-  static createPartial(str: string | Function) {
-    let bindings: Binding[] = [];
-
-    if (typeof str === "string") {
-      // Escape backticks to prevent template literal issues
-      str = str.replace(/`/g, "\\`");
-      // Replace {{...}} with ${...} for data binding
-      str = str.replace(/\{\{\s*([^}]+)\s*\}\}/g, "${$1}");
-
-      // Extract event bindings, e.g., (click)="handleClick"
-      const bindingRegex = /\(([^)]+)\)="([^"]+)"/g;
-      str = str.replace(bindingRegex, (match, eventName, handlerName) => {
-        bindings.push({ eventName, handlerName });
-        // Remove the event binding from the template string to prevent it from being rendered
-        return "";
-      });
+  static createPartial(
+    str: string
+  ): (data?: any, scope?: any) => [string, Binding[]] {
+    if (typeof str !== "string") {
+      throw new Error("Template source must be a string.");
     }
 
-    return (data?: any, scope?: any): [string, Binding[]] => {
+    // Check cache for the precompiled template
+    if (Template.cache.has(str)) {
+      return Template.cache.get(str)!;
+    }
+
+    // Parse bindings and preprocess the template
+    const bindings: Binding[] = [];
+    const preprocessedTemplate = Template.preprocessTemplate(str, bindings);
+
+    // Compile the template into a reusable function
+    const templateFunction = new Function(
+      "data",
+      "scope",
+      "bindings",
+      `'use strict'; ${preprocessedTemplate}`
+    );
+
+    const renderFunction = (data?: any, scope?: any): [string, Binding[]] => {
       data = ensureObject(data);
       scope = scope || this;
-
-      // Sanitize the data to prevent circular references and exclude functions
       const safeData = makeSafeObject(data);
 
-      let headerVars = Object.keys(safeData).map((key) => {
-        // Declare variables corresponding to the data keys
-        return `let ${key} = safeData['${key}']`;
-      });
-
-      const header = headerVars.length ? `${headerVars.join("; ")};` : "";
-
-      if (typeof str === "string") {
-        // Create a new function to evaluate the template string with data and scope
-        const func = new Function(
-          "safeData",
-          "scope",
-          `'use strict'; ${header} return \`${str}\`;`,
-        );
-        const renderedString = func.call(scope, safeData, scope);
-        return [renderedString, bindings];
-      }
-
-      // If str is a function, execute it with the safeData and scope
-      if (typeof str === "function") {
-        return [str.call(scope, safeData), bindings];
-      }
-
-      return ["", bindings];
+      const renderedOutput = templateFunction(safeData, scope, bindings);
+      return [renderedOutput, bindings];
     };
+
+    // Cache the compiled template function
+    Template.cache.set(str, renderFunction);
+    return renderFunction;
+  }
+
+  static preprocessTemplate(template: string, bindings: Binding[]): string {
+    // Escape backticks and preprocess data bindings
+    let processedTemplate = template.replace(/`/g, "\\`");
+
+    // Replace {{...}} with ${...} for data binding
+    processedTemplate = processedTemplate.replace(
+      /\{\{\s*([^}]+)\s*\}\}/g,
+      (_, expr) => {
+        return `\${data.${expr.trim()}}`;
+      }
+    );
+
+    // Extract and preprocess event bindings
+    processedTemplate = processedTemplate.replace(
+      /\(([^)]+)\)="([^"]+)"/g,
+      (_, eventName, handlerName) => {
+        bindings.push({ eventName, handlerName });
+        return ""; // Remove the event binding from the template string
+      }
+    );
+
+    // Wrap the preprocessed template in a return statement
+    return `return \`${processedTemplate}\`;`;
   }
 
   constructor(source: string | Function) {
@@ -63,7 +79,7 @@ export class Template {
 
   define(source: string | Function): this {
     this.source = source;
-    this.render = Template.createPartial(source);
+    this.render = Template.createPartial(source as string);
     return this;
   }
 
