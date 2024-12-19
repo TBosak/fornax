@@ -59,23 +59,19 @@ export function Input() {
 
 export function Output(eventName?: string): PropertyDecorator {
   return function (target: any, propertyKey: string | symbol): void {
-    const actualEventName = eventName || (propertyKey as string);
+    const actualEventName = eventName || propertyKey.toString();
 
     Object.defineProperty(target, propertyKey, {
       get() {
-        // Lazily initialize the EventEmitter if it doesn't already exist
+        // Lazily initialize the Subject if it doesn't already exist
         if (!this[`__${String(propertyKey)}`]) {
-          const emitter = new EventEmitter();
+          const emitter = new EventEmitter<any>();
           emitter.subscribe((value: any) => {
-            console.log(
-              `@Output: Dispatching event '${actualEventName}' with value:`,
-              value
-            );
-
-            // Dispatch the event with bubbles: true to propagate up the DOM
+            // Dispatch the event when the Subject emits
             const event = new CustomEvent(actualEventName, {
               detail: value,
               bubbles: true,
+              composed: true, // Allow crossing shadow DOM boundaries
             });
             this.dispatchEvent(event);
           });
@@ -84,17 +80,9 @@ export function Output(eventName?: string): PropertyDecorator {
         return this[`__${String(propertyKey)}`];
       },
       set(newValue) {
-        // Allow initial assignment if no value exists
-        if (
-          !this[`__${String(propertyKey)}`] &&
-          newValue instanceof EventEmitter
-        ) {
-          this[`__${String(propertyKey)}`] = newValue;
-        } else {
-          throw new Error(
-            `Cannot overwrite @Output property '${String(propertyKey)}'.`
-          );
-        }
+        throw new Error(
+          `Cannot overwrite @Output property '${String(propertyKey)}'.`
+        );
       },
       configurable: true,
       enumerable: true,

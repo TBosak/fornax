@@ -15,7 +15,7 @@ import styles from "./emitting.component.css";
 })
 export class Emitting extends BaseComponent {
   @ViewChild("#clickMe") clickMe!: HTMLButtonElement;
-  @Output() buttonClicked: EventEmitter<string> = new EventEmitter();
+  @Output() buttonClicked!: EventEmitter<string>;
 
   onInit(): void {
     this.clickMe?.addEventListener("click", this.handleClick.bind(this));
