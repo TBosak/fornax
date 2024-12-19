@@ -19,7 +19,6 @@ export class Emitting extends BaseComponent {
 
   onInit(): void {
     this.clickMe?.addEventListener("click", this.handleClick.bind(this));
-    console.log(this.clickMe);
   }
 
   handleClick(): void {
