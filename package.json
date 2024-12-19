@@ -29,6 +29,13 @@
       "types": ["./build/release.d.ts", "./core.d.ts"]
     }
   },
+  "files": [
+    "./index.ts",
+    "./core",
+    "./core/types/global.d.ts",
+    "./build/release.d.ts"
+  ],
+  "types": "./core/types/global.d.ts",
   "devDependencies": {
     "assemblyscript": "^0.27.31"
   }

@@ -9,7 +9,7 @@
     "allowJs": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-
+    "typeRoots": ["./node_modules/fornaxjs/core/types"],
     // Bundler mode
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
