@@ -79,7 +79,7 @@ export class BaseComponent extends HTMLElement {
     }
 
     const reactiveProps = this.extractTemplateProperties(
-      this.__config.template
+      this.__config.template,
     );
     const proto = Object.getPrototypeOf(this);
 
@@ -159,7 +159,7 @@ export class BaseComponent extends HTMLElement {
     const parser = Parser.sharedInstance();
     const renderResult = this.template.render(this.model, this) as [
       string,
-      Binding[]
+      Binding[],
     ];
     const [templateString, bindings] = renderResult;
 
@@ -177,7 +177,7 @@ export class BaseComponent extends HTMLElement {
           } else {
             console.warn(
               `Handler '${handlerName}' is not defined in component:`,
-              this
+              this,
             );
           }
         });

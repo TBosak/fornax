@@ -10,7 +10,7 @@ watch(srcDir, { recursive: true }, async (event, filename) => {
   if (!filename) return; // Sometimes filename may be null
 
   console.log(
-    `File ${filename} changed (${event}) - updating dist...refresh browser to see changes.`
+    `File ${filename} changed (${event}) - updating dist...refresh browser to see changes.`,
   );
 
   // Construct full source path by joining srcDir and filename
@@ -30,7 +30,7 @@ watch(srcDir, { recursive: true }, async (event, filename) => {
         env: process.env,
         stdout: "inherit",
         stderr: "inherit",
-      }
+      },
     );
     await childProc.exited;
   } else {

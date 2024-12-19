@@ -31,7 +31,7 @@ try {
       .map((file: any) => {
         const importPath = `${dir.replaceAll("\\", "/")}/${basename(
           file,
-          extname(file)
+          extname(file),
         )}`;
         return `import "${importPath}";`;
       })
@@ -58,7 +58,7 @@ try {
   if (initialLoad) {
     copyFolderRecursiveSync(
       join(config.srcDir, "assets"),
-      join(config.distDir, "assets")
+      join(config.distDir, "assets"),
     );
   }
 

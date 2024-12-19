@@ -19,7 +19,7 @@ Fornax is a lightweight, opinionated, and Bun-powered web framework designed to 
 ### Prerequisites
 
 - **Bun:** Install Bun from [https://bun.sh/](https://bun.sh/)
-  
+
 ### Installation
 
 Add Fornax to your existing Bun project:
@@ -32,8 +32,8 @@ Create a `fornax.config.js` in your project’s root to configure directories an
 
 ```js
 export default {
-  srcDir: './src',
-  distDir: './dist',
+  srcDir: "./src",
+  distDir: "./dist",
   port: 5000,
 };
 ```
@@ -70,6 +70,7 @@ fnx dev
 ```
 
 This starts:
+
 - Bun as a back-end/static server with watch mode.
 
 ### Building for Production
@@ -98,8 +99,8 @@ Your `fornax.config.js` might look like this:
 
 ```js
 export default {
-  srcDir: './src',
-  distDir: './dist',
+  srcDir: "./src",
+  distDir: "./dist",
   port: 5000,
 };
 ```
@@ -124,12 +125,12 @@ This is configured in the Component decorator.
 Define routes in `routes.ts`:
 
 ```typescript
-import { SomeComponent } from './app/components/some.component';
-import { OtherComponent } from './app/components/other.component';
+import { SomeComponent } from "./app/components/some.component";
+import { OtherComponent } from "./app/components/other.component";
 
 export const routes = [
-  { path: '/', component: SomeComponent },
-  { path: '/other', component: OtherComponent },
+  { path: "/", component: SomeComponent },
+  { path: "/other", component: OtherComponent },
 ];
 
 addRouter("some-selector", routes);
@@ -139,14 +140,14 @@ In your main component (`app-component.ts`):
 
 ```typescript
 @Component({
-  selector: 'app-component',
+  selector: "app-component",
   template: `
     <nav>
       <a href="/">Some Component</a>
       <a href="/other">Other Component</a>
     </nav>
     <some-selector></some-selector>
-  `
+  `,
 })
 export class AppComponent extends BaseComponent {}
 ```
@@ -209,9 +210,7 @@ import { ApiService } from "../services/api.service";
 
 @Component({
   selector: "hello-world",
-  template: `
-    <p>{{ apiResponse }}</p>
-  `,
+  template: ` <p>{{ apiResponse }}</p> `,
 })
 export class HelloWorld extends BaseComponent {
   apiResponse = "Loading...";
@@ -230,9 +229,7 @@ import { Component, BaseComponent } from "fornaxjs";
 
 @Component({
   selector: "hello-world",
-  template: `
-    <h1>Hello {{ name }}!</h1>
-  `,
+  template: ` <h1>Hello {{ name }}!</h1> `,
 })
 export class HelloWorld extends BaseComponent {
   name = "World";
@@ -261,7 +258,7 @@ Fornax is a young project aiming for a simple, productive development experience
    ```bash
    bun install
    ```
-4. **Submit Pull Requests or Issues:**
+3. **Submit Pull Requests or Issues:**
    We'd love your feedback and contributions!
 
 ---
@@ -271,7 +268,7 @@ Fornax is a young project aiming for a simple, productive development experience
 Fornax is licensed under the MIT License. Feel free to use it in commercial and open-source projects.
 
 **Happy coding with Fornax!**
-  
+
 ---
 
 ## TODO:

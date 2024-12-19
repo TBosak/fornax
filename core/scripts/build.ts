@@ -19,7 +19,7 @@ const config = loadConfig();
       env: process.env,
       stdout: "inherit",
       stderr: "inherit",
-    }
+    },
   );
   await childProc.exited;
 })();

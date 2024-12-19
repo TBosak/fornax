@@ -1,5 +1,5 @@
 export default {
-    srcDir: './src',
-    distDir: './dist',
-    port: 5000
-  };
+  srcDir: "./src",
+  distDir: "./dist",
+  port: 5000,
+};

@@ -67,10 +67,16 @@ export function Output(eventName?: string): PropertyDecorator {
         if (!this[`__${String(propertyKey)}`]) {
           const emitter = new EventEmitter();
           emitter.subscribe((value: any) => {
-            console.log(`@Output: Dispatching event '${actualEventName}' with value:`, value);
+            console.log(
+              `@Output: Dispatching event '${actualEventName}' with value:`,
+              value,
+            );
 
             // Dispatch the event with bubbles: true to propagate up the DOM
-            const event = new CustomEvent(actualEventName, { detail: value, bubbles: true });
+            const event = new CustomEvent(actualEventName, {
+              detail: value,
+              bubbles: true,
+            });
             this.dispatchEvent(event);
           });
           this[`__${String(propertyKey)}`] = emitter;
@@ -79,10 +85,15 @@ export function Output(eventName?: string): PropertyDecorator {
       },
       set(newValue) {
         // Allow initial assignment if no value exists
-        if (!this[`__${String(propertyKey)}`] && newValue instanceof EventEmitter) {
+        if (
+          !this[`__${String(propertyKey)}`] &&
+          newValue instanceof EventEmitter
+        ) {
           this[`__${String(propertyKey)}`] = newValue;
         } else {
-          throw new Error(`Cannot overwrite @Output property '${String(propertyKey)}'.`);
+          throw new Error(
+            `Cannot overwrite @Output property '${String(propertyKey)}'.`,
+          );
         }
       },
       configurable: true,
@@ -90,7 +101,6 @@ export function Output(eventName?: string): PropertyDecorator {
     });
   };
 }
-
 
 export function Service(key: string) {
   return function <T extends { new (...args: any[]): {} }>(constructor: T) {
@@ -121,7 +131,7 @@ export function ViewChild(selector: string): PropertyDecorator {
         }
 
         console.warn(
-          `@ViewChild: Element with selector '${selector}' not found. Retrying...`
+          `@ViewChild: Element with selector '${selector}' not found. Retrying...`,
         );
         requestAnimationFrame(attemptToFindElement);
       };
@@ -141,7 +151,7 @@ export function ViewChildren(selector: string): PropertyDecorator {
 
       const elements = Array.from(
         this.shadowRoot?.querySelectorAll(selector) ||
-          this.querySelectorAll(selector)
+          this.querySelectorAll(selector),
       );
       this[propertyKey] = elements;
     };
