@@ -163,7 +163,7 @@ Components must extend BaseComponent and use the Component decorator (similar to
 ```typescript
 @Component({
   selector: 'selector-goes-here',
-  template: `html goes here`
+  template: `html goes here`,
   style: `style goes here`
 })
 export class SomeComponent extends BaseComponent {
