@@ -46,14 +46,13 @@ A typical Fornax project might look like this:
 project/
 ├─ src/
 │  ├─ index.html
-│  ├─ main.ts
+│  ├─ routes.ts
+│  ├─ app.component.ts
 │  ├─ app/
 │  │  ├─ components/
 │  │  │   ├─ some.component.ts
 │  │  │   ├─ other.component.ts
 │  │  ├─ assets/
-│  ├─ routes.ts
-│  ├─ app.component.ts
 ├─ fornax.config.js
 └─ main.ts
 ```
@@ -163,7 +162,7 @@ Components must extend BaseComponent and use the Component decorator (similar to
 ```typescript
 @Component({
   selector: 'selector-goes-here',
-  template: `html goes here`
+  template: `html goes here`,
   style: `style goes here`
 })
 export class SomeComponent extends BaseComponent {
@@ -282,5 +281,6 @@ Implementing standalone components and Angular-like module system? Right now I'm
 Finish Output decorator and handling event binding <br>
 ~~Fix full page reloads on routing~~ <br>
 ~~Clean up dist folder chunks on build~~ <br>
-More granular builds to avoid replacing all files in dist on every code change <br>
+~~More granular builds to avoid replacing all files in dist on every code change~~ <br>
+SCHEMATICS <br>
 ...
