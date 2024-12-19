@@ -46,7 +46,6 @@ A typical Fornax project might look like this:
 project/
 ├─ src/
 │  ├─ index.html
-│  ├─ main.ts
 │  ├─ app/
 │  │  ├─ components/
 │  │  │   ├─ some.component.ts
