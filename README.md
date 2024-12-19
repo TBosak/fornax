@@ -131,6 +131,8 @@ export const routes = [
   { path: '/', component: SomeComponent },
   { path: '/other', component: OtherComponent },
 ];
+
+addRouter("some-selector", routes);
 ```
 
 In your main component (`app-component.ts`):
@@ -143,13 +145,107 @@ In your main component (`app-component.ts`):
       <a href="/">Some Component</a>
       <a href="/other">Other Component</a>
     </nav>
-    <router-outlet></router-outlet>
+    <some-selector></some-selector>
   `
 })
 export class AppComponent extends BaseComponent {}
 ```
 
-~~Use client-side routing by preventing full page reloads and leveraging the `<router-outlet>` to update views dynamically.~~ (WIP to prevent full page reloads)
+Use client-side routing by preventing full page reloads and leveraging the `<some-selector>` to update views dynamically.
+
+---
+
+## Components and Services
+
+Components must extend BaseComponent and use the Component decorator (similar to Angular):
+
+```typescript
+@Component({
+  selector: 'selector-goes-here',
+  template: `html goes here`
+  style: `style goes here`
+})
+export class SomeComponent extends BaseComponent {
+  onInit(): void {
+    // Lifecycle hooks inherited from BaseComponent
+  }
+
+  onDestroy(): void {
+    // Lifecycle hooks inherited from BaseComponent
+  }
+}
+```
+
+You can import html or css into your component using Bun pre-configured loaders:
+
+```typescript
+import { Component, BaseComponent } from "fornaxjs";
+import html from "./some.component.html" with { type: "text" };
+import styles from "./some.component.css";
+@Component({
+  selector: 'selector-goes-here',
+  template: html
+  style: styles
+})
+export class SomeComponent extends BaseComponent {}
+```
+
+Services are lazily instatiated and then shared in a map across components via Context:
+
+```typescript
+import { Service } from "fornaxjs";
+
+@Service("ApiService")
+export class ApiService {
+  getData() {
+    return "Welcome to Fornax!";
+  }
+}
+```
+
+```typescript
+import { Component, BaseComponent, Context } from "fornaxjs";
+import { ApiService } from "../services/api.service";
+
+@Component({
+  selector: "hello-world",
+  template: `
+    <p>{{ apiResponse }}</p>
+  `,
+})
+export class HelloWorld extends BaseComponent {
+  apiResponse = "Loading...";
+
+  onInit(): void {
+    const apiService: ApiService = Context.get("ApiService");
+    this.apiResponse = apiService.getData();
+  }
+}
+```
+
+Any properties of the component that are featured in the template will cause a re-render when updated:
+
+```typescript
+import { Component, BaseComponent } from "fornaxjs";
+
+@Component({
+  selector: "hello-world",
+  template: `
+    <h1>Hello {{ name }}!</h1>
+  `,
+})
+export class HelloWorld extends BaseComponent {
+  name = "World";
+  names: string[] = ["World", "GitHub", "Reddit", "Friends"];
+  interval: any = setInterval(() => this.cycleNames(), 2000);
+
+  cycleNames() {
+    let name = this.names.shift() as string;
+    this.names.push(name);
+    this.name = name;
+  }
+}
+```
 
 ---
 
