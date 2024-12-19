@@ -10,7 +10,7 @@ export class Context {
   }
 
   // Retrieve the service instance (lazy initialization)
-  static get<T>(key: string): T | undefined {
+  static get<T>(key: string): T {
     // If the instance already exists, return it
     if (this.instances.has(key)) {
       return this.instances.get(key);
@@ -24,7 +24,7 @@ export class Context {
       return instance;
     }
 
-    return undefined; // Service not found
+    throw new Error(`Service ${key} is not registered`);
   }
 
   // Optional: Remove a service instance
