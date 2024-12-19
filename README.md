@@ -46,13 +46,13 @@ A typical Fornax project might look like this:
 project/
 ├─ src/
 │  ├─ index.html
+│  ├─ routes.ts
+│  ├─ app.component.ts
 │  ├─ app/
 │  │  ├─ components/
 │  │  │   ├─ some.component.ts
 │  │  │   ├─ other.component.ts
 │  │  ├─ assets/
-│  ├─ routes.ts
-│  ├─ app.component.ts
 ├─ fornax.config.js
 └─ main.ts
 ```
