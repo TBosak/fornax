@@ -143,17 +143,32 @@ export function ViewChild(selector: string): PropertyDecorator {
 }
 
 export function ViewChildren(selector: string): PropertyDecorator {
-  return function (target: any, propertyKey: string) {
-    const init = target.connectedCallback;
+  return function (target: any, propertyKey: string | symbol): void {
+    const originalConnectedCallback = target.connectedCallback;
 
     target.connectedCallback = function (...args: any[]) {
-      if (init) init.apply(this, args);
+      if (originalConnectedCallback) {
+        originalConnectedCallback.apply(this, args);
+      }
 
-      const elements = Array.from(
-        this.shadowRoot?.querySelectorAll(selector) ||
-          this.querySelectorAll(selector)
-      );
-      this[propertyKey] = elements;
+      const attemptToFindElement = () => {
+        const element =
+          this.shadowRoot?.querySelectorAll(selector) ||
+          this.querySelectorAll(selector);
+
+        if (element) {
+          this[propertyKey] = element; // Direct assignment
+          return;
+        }
+
+        console.warn(
+          `@ViewChild: Element with selector '${selector}' not found. Retrying...`
+        );
+        requestAnimationFrame(attemptToFindElement);
+      };
+
+      // Defer query until the next frame
+      requestAnimationFrame(attemptToFindElement);
     };
   };
 }
