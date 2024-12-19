@@ -1,9 +1,9 @@
-export declare module "*.html" {
+declare module "*.html" {
   const content: string;
   export default content;
 }
 
-export declare module "*.css" {
+declare module "*.css" {
   const content: string;
   export default content;
 }

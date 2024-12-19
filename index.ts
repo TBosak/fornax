@@ -11,7 +11,6 @@ import {
 import { EventEmitter } from "./core/EventEmitter.js";
 import { RouterOutlet, addRouter } from "./core/Routing.js";
 import { Context } from "./core/Context.js";
-export * from "./core/types/global.js";
 export {
   BaseComponent,
   Component,
