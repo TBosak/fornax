@@ -69,7 +69,7 @@ export function Output(eventName?: string): PropertyDecorator {
           emitter.subscribe((value: any) => {
             console.log(
               `@Output: Dispatching event '${actualEventName}' with value:`,
-              value,
+              value
             );
 
             // Dispatch the event with bubbles: true to propagate up the DOM
@@ -92,7 +92,7 @@ export function Output(eventName?: string): PropertyDecorator {
           this[`__${String(propertyKey)}`] = newValue;
         } else {
           throw new Error(
-            `Cannot overwrite @Output property '${String(propertyKey)}'.`,
+            `Cannot overwrite @Output property '${String(propertyKey)}'.`
           );
         }
       },
@@ -131,7 +131,7 @@ export function ViewChild(selector: string): PropertyDecorator {
         }
 
         console.warn(
-          `@ViewChild: Element with selector '${selector}' not found. Retrying...`,
+          `@ViewChild: Element with selector '${selector}' not found. Retrying...`
         );
         requestAnimationFrame(attemptToFindElement);
       };
@@ -151,7 +151,7 @@ export function ViewChildren(selector: string): PropertyDecorator {
 
       const elements = Array.from(
         this.shadowRoot?.querySelectorAll(selector) ||
-          this.querySelectorAll(selector),
+          this.querySelectorAll(selector)
       );
       this[propertyKey] = elements;
     };

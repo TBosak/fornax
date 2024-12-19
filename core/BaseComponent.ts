@@ -13,10 +13,30 @@ export class BaseComponent extends HTMLElement {
   private _shadow: ShadowRoot;
   private renderScheduled: boolean = false;
   private reactivePropsCache = new Map<string, string[]>();
+  private observer: IntersectionObserver;
+  private _isConnected = false;
+  private idleCallbackId: number | null = null;
 
   connectedCallback() {
+    this._isConnected = true;
     this._shadow = this.attachShadow({ mode: "open" });
     this.initializeComponent();
+
+    // Observe visibility changes
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          this._isConnected = entry.isIntersecting;
+          if (!entry.isIntersecting) {
+            cancelIdleCallback(this.idleCallbackId);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    this.observer.observe(this);
+
     requestAnimationFrame(() => {
       setTimeout(() => {
         if (typeof this.onInit === "function") {
@@ -29,11 +49,10 @@ export class BaseComponent extends HTMLElement {
   private async initializeComponent() {
     const globalCSS =
       this.__config.styleMode !== "scoped" ? await globalStyles : "";
-
-    let combinedStyles = this.__config.style || "";
-    if (this.__config.styleMode !== "scoped") {
-      combinedStyles = `${combinedStyles}\n${globalCSS}`;
-    }
+    const combinedStyles =
+      this.__config.styleMode === "scoped"
+        ? this.__config.style
+        : `${this.__config.style || ""}\n${globalCSS}`;
 
     if (this.__config.template) {
       this.__config.style = combinedStyles;
@@ -45,13 +64,23 @@ export class BaseComponent extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.onDestroy();
+    this._isConnected = false;
+
+    // Cancel any pending requestIdleCallback
+    if (this.idleCallbackId !== null) {
+      cancelIdleCallback(this.idleCallbackId);
+      this.idleCallbackId = null;
+    }
+
+    if (typeof this.onDestroy === "function") {
+      this.onDestroy();
+    }
   }
 
   private init(): void {
     this.template = new Template(this.__config.template!);
     this.setupReactiveProperties();
-    this.render();
+    this.render(true);
   }
 
   private extractTemplateProperties(template: string): string[] {
@@ -73,13 +102,10 @@ export class BaseComponent extends HTMLElement {
   }
 
   private setupReactiveProperties(): void {
-    if (!this.__config?.template) {
-      console.warn("Template not defined for this component.");
-      return;
-    }
+    if (!this.__config?.template) return;
 
     const reactiveProps = this.extractTemplateProperties(
-      this.__config.template,
+      this.__config.template
     );
     const proto = Object.getPrototypeOf(this);
 
@@ -105,6 +131,7 @@ export class BaseComponent extends HTMLElement {
             enumerable: true,
           });
         } else {
+          // Respect existing getter and setter logic
           const originalGet = descriptor.get;
           const originalSet = descriptor.set;
 
@@ -139,73 +166,92 @@ export class BaseComponent extends HTMLElement {
   }
 
   private scheduleRender(): void {
+    if (!this._isConnected) return; // Prevent rendering if disconnected
+
     if (!this.renderScheduled) {
       this.renderScheduled = true;
+
       requestAnimationFrame(() => {
-        this.render();
-        this.renderScheduled = false;
+        // Cancel any previous idle task before scheduling a new one
+        if (this.idleCallbackId !== null) {
+          cancelIdleCallback(this.idleCallbackId);
+        }
+
+        this.idleCallbackId = requestIdleCallback(() => {
+          this.processRender();
+          this.idleCallbackId = null;
+        });
       });
     }
   }
 
-  private async render() {
+  private processRender(): void {
+    if (!this._isConnected) return;
+    this.render();
+    this.renderScheduled = false;
+  }
+
+  private async render(initial: boolean = false): Promise<void> {
     if (!this._shadow) {
       console.error("Shadow root is not attached.");
       return;
     }
 
-    const shadow = this._shadow;
-
     const parser = Parser.sharedInstance();
     const renderResult = this.template.render(this.model, this) as [
       string,
-      Binding[],
+      Binding[]
     ];
     const [templateString, bindings] = renderResult;
 
     const patchFn = parser.createPatch(templateString);
-    const sheet = new CSSStyleSheet();
-    sheet.replaceSync(this.__config.style || "");
-    this._shadow.adoptedStyleSheets = [sheet];
-    try {
-      patchFn(shadow);
+
+    const processChunk = () => {
+      try {
+        patchFn(this._shadow);
+      } catch (error) {
+        console.error("Error rendering component", error);
+      }
+    };
+
+    if (initial) {
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(this.__config.style || "");
+      this._shadow.adoptedStyleSheets = [sheet];
       bindings.forEach(({ eventName, handlerName }) => {
-        this.addEventListener(eventName, (event: CustomEvent) => {
-          const handler = (this as any)[handlerName];
+        this.addEventListener(eventName, (event) => {
+          const handler = this[handlerName];
           if (typeof handler === "function") {
             handler.call(this, event);
           } else {
             console.warn(
               `Handler '${handlerName}' is not defined in component:`,
-              this,
+              this
             );
           }
         });
       });
-    } catch (error) {
-      console.error("Render Error:", error);
+    }
+
+    // Clear `_renderComplete` before starting a new render
+    processChunk();
+    if (typeof this.onRenderComplete === "function") {
+      this.onRenderComplete();
     }
   }
 
   static get observedAttributes() {
-    return this.inputs.map((input) => toKebabCase(input));
+    return this.inputs.map(toKebabCase);
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
     const propName = toCamelCase(name);
-    if (
-      (this.constructor as typeof BaseComponent).inputs &&
-      (this.constructor as typeof BaseComponent).inputs.includes(propName)
-    ) {
-      (this as any)[propName] = newValue;
+    if ((this.constructor as typeof BaseComponent).inputs.includes(propName)) {
+      this[propName] = newValue;
     }
   }
 
-  onInit(): void {
-    // Optionally override this method
-  }
-
-  onDestroy(): void {
-    // Optionally override this method
-  }
+  onInit(): void {}
+  onDestroy(): void {}
+  onRenderComplete(): void {}
 }

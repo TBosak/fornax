@@ -1,5 +1,5 @@
 import * as wasm from "./build/release.js";
-import { BaseComponent } from "./core/Component.js";
+import { BaseComponent } from "./core/BaseComponent";
 import {
   Component,
   Input,
@@ -8,9 +8,9 @@ import {
   ViewChild,
   ViewChildren,
 } from "./core/Decorators";
-import { EventEmitter } from "./core/EventEmitter.js";
-import { RouterOutlet, addRouter } from "./core/Routing.js";
-import { Context } from "./core/Context.js";
+import { EventEmitter } from "./core/EventEmitter";
+import { RouterOutlet, addRouter } from "./core/Routing";
+import { Context } from "./core/Context";
 export {
   BaseComponent,
   Component,

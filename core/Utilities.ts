@@ -65,4 +65,15 @@ export function copyFolderRecursiveSync(src, dest) {
   }
 }
 
+export function throttle(callback: Function, limit: number) {
+  let inThrottle: boolean;
+  return function (...args: any[]) {
+    if (!inThrottle) {
+      callback(...args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+}
+
 export { toCamelCase, toKebabCase, minifyCSS };

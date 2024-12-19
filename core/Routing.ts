@@ -1,5 +1,5 @@
 import { Router } from "@vaadin/router";
-import { BaseComponent } from "./Component";
+import { BaseComponent } from "./BaseComponent";
 import type { Route } from "./Models";
 import { Component } from "./Decorators";
 
