@@ -282,6 +282,6 @@ Implementing standalone components and Angular-like module system? Right now I'm
 Finish Output decorator and handling event binding <br>
 ~~Fix full page reloads on routing~~ <br>
 ~~Clean up dist folder chunks on build~~ <br>
-More granular builds to avoid replacing all files in dist on every code change <br>
+~~More granular builds to avoid replacing all files in dist on every code change~~ <br>
 SCHEMATICS <br>
 ...
