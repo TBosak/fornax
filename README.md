@@ -28,15 +28,18 @@ Add Fornax to your existing Bun project:
 bun add fornaxjs
 ```
 
-Create a `fornax.config.ts` in your project’s root to configure directories and ports:
+Create a `fornax.config.ts` in your project’s root to configure directories, ports, custom plugins, and extra entry points:
 
 ```typescript
 export default {
   srcDir: "./src",
   distDir: "./dist",
   port: 5000,
+  plugins: [],
+  entryPoints: []
 };
 ```
+Adjust as needed.
 
 ### Project Structure
 
@@ -89,22 +92,6 @@ fnx start
 ```
 
 Open `http://localhost:5000` to view your application.
-
----
-
-## Configuring Fornax
-
-Your `fornax.config.ts` might look like this:
-
-```typescript
-export default {
-  srcDir: "./src",
-  distDir: "./dist",
-  port: 5000,
-};
-```
-
-Adjust `srcDir`, `distDir`, and `port` as needed.
 
 ---
 
@@ -278,7 +265,7 @@ Fornax is licensed under the MIT License. Feel free to use it in commercial and 
 Should there be a SubscriptionTracker baked into BaseComponent & we unsubscribe on disconnectedCallback? <br>
 Implementing standalone components and Angular-like module system? Right now I'm just dumping everything into main. <br>
 ~~Set up Vite for HMR when running dev script, with Bun handling prod build or can we just achieve live reloading with Bun? - https://bun.sh/guides/read-file/watch~~<br>
-Finish Output decorator and handling event binding <br>
+~~Finish Output decorator and handling event binding~~ <br>
 ~~Fix full page reloads on routing~~ <br>
 ~~Clean up dist folder chunks on build~~ <br>
 ~~More granular builds to avoid replacing all files in dist on every code change~~ <br>
