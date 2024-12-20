@@ -36,7 +36,8 @@ export default {
   distDir: "./dist",
   port: 5000,
   plugins: [],
-  entryPoints: []
+  entryPoints: [],
+  alternateStyleLoader: null
 };
 ```
 Adjust as needed.
