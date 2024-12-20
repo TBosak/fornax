@@ -28,9 +28,9 @@ Add Fornax to your existing Bun project:
 bun add fornaxjs
 ```
 
-Create a `fornax.config.js` in your project’s root to configure directories and ports:
+Create a `fornax.config.ts` in your project’s root to configure directories and ports:
 
-```js
+```typescript
 export default {
   srcDir: "./src",
   distDir: "./dist",
@@ -53,7 +53,7 @@ project/
 │  │  │   ├─ some.component.ts
 │  │  │   ├─ other.component.ts
 │  │  ├─ assets/
-├─ fornax.config.js
+├─ fornax.config.ts
 └─ main.ts
 ```
 
@@ -94,9 +94,9 @@ Open `http://localhost:5000` to view your application.
 
 ## Configuring Fornax
 
-Your `fornax.config.js` might look like this:
+Your `fornax.config.ts` might look like this:
 
-```js
+```typescript
 export default {
   srcDir: "./src",
   distDir: "./dist",

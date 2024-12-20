@@ -8,14 +8,16 @@ export function loadConfig(): FornaxConfig {
     srcDir: resolve(projectRoot, "./src"),
     distDir: resolve(projectRoot, "./dist"),
     port: 5000,
+    plugins: [],
+    entryPoints: [],
   };
 
-  const configPath = resolve(projectRoot, "fornax.config.js");
+  const configPath = resolve(projectRoot, "fornax.config.ts");
   if (existsSync(configPath)) {
     const cfg = require(configPath);
     return { ...defaults, ...cfg.default };
   }
 
-  console.warn("No fornax.config.js found, using defaults.");
+  console.warn("No fornax.config.ts found, using defaults.");
   return defaults;
 }
