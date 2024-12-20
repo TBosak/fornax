@@ -28,7 +28,7 @@ Add Fornax to your existing Bun project:
 bun add fornaxjs
 ```
 
-Create a `fornax.config.ts` in your project’s root to configure directories, ports, custom plugins, and extra entry points:
+Create a `fornax.config.ts` in your project’s root to configure directories, ports, custom plugins (style-loader is included by default for css imports), and extra entry points:
 
 ```typescript
 export default {
