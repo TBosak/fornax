@@ -52,6 +52,7 @@ try {
     outdir: config.distDir,
     target: "browser",
     splitting: true,
+    minify: true,
     plugins: [styleLoader()].concat(config.plugins),
     naming: {
       entry: "[name].[ext]",
