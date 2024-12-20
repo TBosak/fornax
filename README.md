@@ -269,5 +269,6 @@ Implementing standalone components and Angular-like module system? Right now I'm
 ~~Fix full page reloads on routing~~ <br>
 ~~Clean up dist folder chunks on build~~ <br>
 ~~More granular builds to avoid replacing all files in dist on every code change~~ <br>
+Configure CSS minification on build <br>
 SCHEMATICS <br>
 ...
