@@ -49,18 +49,45 @@ export class Template {
   }
 
   static preprocessTemplate(template: string, bindings: Binding[]): string {
-    // Escape backticks and preprocess data bindings
     let processedTemplate = template.replace(/`/g, "\\`");
-
-    // Replace {{...}} with ${...} for data binding
+  
+    // Handle "if" directive first
     processedTemplate = processedTemplate.replace(
-      /\{\{\s*([^}]+)\s*\}\}/g,
-      (_, expr) => {
-        return `\${data.${expr.trim()}}`;
+      /<([a-zA-Z0-9-]+)[^>]*\s\*if="([^"]+)"[^>]*>([\s\S]*?)<\/\1>/g,
+      (_, tagName, condition, content) => {
+        const dataCondition = condition.replace(
+          /\b([a-zA-Z_][a-zA-Z0-9_]*)\b/g,
+          (match) => `data.${match}` // Prefix variables with `data.`
+        );
+        return `\${(${dataCondition}) ? \`<${tagName}>${content}</${tagName}>\` : ''}`;
       }
     );
-
-    // Extract and preprocess event bindings
+  
+    // Handle "forEach" directive
+    processedTemplate = processedTemplate.replace(
+      /<([a-zA-Z0-9-]+)[^>]*\s\*for="([^"]+)\s+of\s+([^"]+)"[^>]*>([\s\S]*?)<\/\1>/g,
+      (_, tagName, item, collection, content) => {
+        const dataCollection = collection.replace(
+          /\b([a-zA-Z_][a-zA-Z0-9_]*)\b/g,
+          (match) => `data.${match}` // Prefix collection with `data`
+        );
+  
+        const loopProcessedContent = content.replace(
+          /\{\{\s*([^}]+)\s*\}\}/g,
+          (_, expr) => expr.trim() === item.trim() ? `\${${item.trim()}}` : `\${data.${expr.trim()}}`
+        );
+  
+        return `\${(${dataCollection}).map(${item} => \`<${tagName}>\${(() => \`${loopProcessedContent}\`)()}</${tagName}>\`).join('')}`;
+      }
+    );
+  
+    // Replace remaining {{...}} bindings globally
+    processedTemplate = processedTemplate.replace(
+      /\{\{\s*([^}]+)\s*\}\}/g,
+      (_, expr) => `\${data.${expr.trim()}}`
+    );
+  
+    // Extract and preprocess event bindings (if applicable)
     processedTemplate = processedTemplate.replace(
       /\(([^)]+)\)="([^"]+)"/g,
       (_, eventName, handlerName) => {
@@ -68,10 +95,10 @@ export class Template {
         return ""; // Remove the event binding from the template string
       }
     );
-
-    // Wrap the preprocessed template in a return statement
+  
     return `return \`${processedTemplate}\`;`;
   }
+  
 
   constructor(source: string | Function) {
     this.define(source);

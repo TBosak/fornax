@@ -56,7 +56,6 @@ export class BaseComponent extends HTMLElement {
 
     if (this.__config.template) {
       this.__config.style = combinedStyles;
-      this.__config.template = `<style>${combinedStyles}</style>${this.__config.template}`;
       this.init();
     } else {
       console.warn("Template is not defined for the component.");
@@ -88,12 +87,32 @@ export class BaseComponent extends HTMLElement {
       return this.reactivePropsCache.get(template)!;
     }
 
-    const propertyRegex = /{{\s*([a-zA-Z0-9_]+)\s*}}/g;
+    const propertyRegex = /{{\s*([a-zA-Z0-9_]+)\s*}}/g; // Match {{ prop }}
+    const ifDirectiveRegex = /\*if="([^"]+)"/g; // Match *if="condition"
+    const forDirectiveRegex = /\*for="([^"]+)\s+of\s+([^"]+)"/g; // Match *for="item of collection"
+
     const matches = new Set<string>();
 
+    // Extract properties from {{ }} bindings
     let match;
     while ((match = propertyRegex.exec(template)) !== null) {
       matches.add(match[1]);
+    }
+
+    // Extract properties from *if directives
+    while ((match = ifDirectiveRegex.exec(template)) !== null) {
+      const condition = match[1];
+      const conditionProps = condition.match(/[a-zA-Z0-9_]+/g); // Extract individual properties
+      if (conditionProps) {
+        conditionProps.forEach((prop) => matches.add(prop));
+      }
+    }
+
+    // Extract properties from *for directives
+    while ((match = forDirectiveRegex.exec(template)) !== null) {
+      const [, item, collection] = match;
+      matches.add(item); // Add the item variable
+      matches.add(collection); // Add the collection variable
     }
 
     const props = Array.from(matches);
@@ -214,6 +233,7 @@ export class BaseComponent extends HTMLElement {
       }
     };
 
+    // Clear `_renderComplete` before starting a new render
     if (initial) {
       const sheet = new CSSStyleSheet();
       sheet.replaceSync(this.__config.style || "");
@@ -233,7 +253,6 @@ export class BaseComponent extends HTMLElement {
       });
     }
 
-    // Clear `_renderComplete` before starting a new render
     processChunk();
     if (typeof this.onRenderComplete === "function") {
       this.onRenderComplete();
