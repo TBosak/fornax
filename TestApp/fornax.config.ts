@@ -4,4 +4,5 @@ export default {
   port: 5000,
   plugins: [],
   entryPoints: [],
+  alternateStyleLoader: null,
 };

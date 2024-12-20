@@ -16,6 +16,7 @@ export interface FornaxConfig {
   port: number;
   plugins: BunPlugin[];
   entryPoints: string[];
+  alternateStyleLoader?: BunPlugin;
 }
 
 export class ComponentConfig {

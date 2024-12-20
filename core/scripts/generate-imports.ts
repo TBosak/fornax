@@ -46,14 +46,16 @@ try {
   );
 
   writeFileSync(entryFile, code, "utf-8");
-
+  const styles = config.alternateStyleLoader
+    ? config.alternateStyleLoader
+    : styleLoader();
   const build = await Bun.build({
     entrypoints: [entryFile, routes, ...extraEntryPoints],
     outdir: config.distDir,
     target: "browser",
     splitting: true,
     minify: true,
-    plugins: [styleLoader()].concat(config.plugins),
+    plugins: [styles].concat(config.plugins),
     naming: {
       entry: "[name].[ext]",
     },
