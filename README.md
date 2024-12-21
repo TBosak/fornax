@@ -234,6 +234,103 @@ export class HelloWorld extends BaseComponent {
 
 ---
 
+Here’s a concise guide to the `*if` and `*for` directives for your `README.md`, including examples and usage instructions:
+
+---
+
+## Conditional and Iterative Rendering with `*if` and `*for`
+
+Fornax provides powerful directives for conditionally rendering elements (`*if`) and iterating over collections (`*for`). These directives simplify dynamic UI updates while keeping your templates clean and declarative.
+
+---
+
+### `*if` Directive
+
+The `*if` directive conditionally renders an element based on a boolean expression.
+
+#### Syntax
+```html
+<element *if="condition">Content</element>
+```
+
+- `condition`: A boolean expression evaluated against the component's properties.
+
+#### Example
+```html
+<p *if="showText">This text is visible when 'showText' is true.</p>
+<p *if="!showText">This text is visible when 'showText' is false.</p>
+```
+
+#### Component Code
+```typescript
+@Component({...})
+export class ExampleComponent extends BaseComponent {
+  showText = true;
+
+  toggleText() {
+    this.showText = !this.showText;
+  }
+}
+```
+
+---
+
+### `*for` Directive
+
+The `*for` directive iterates over a collection and renders the specified element for each item.
+
+#### Syntax
+```html
+<element *for="item of collection">{{ item }}</element>
+```
+
+- `item`: The loop variable representing each element in the collection.
+- `collection`: The array or iterable to iterate over.
+
+#### Example
+```html
+<ul>
+  <li *for="item of items">{{ item }}</li>
+</ul>
+```
+
+#### Component Code
+```typescript
+@Component({...})
+export class ExampleComponent extends BaseComponent {
+  items = ["Item 1", "Item 2", "Item 3"];
+}
+```
+
+---
+
+### Combined Usage
+
+The `*if` and `*for` directives can be used together for complex rendering logic.
+
+#### Example
+```html
+<ul *if="!itemsHidden">
+  <li *for="item of items">{{ item }}</li>
+</ul>
+<p *if="itemsHidden">The items are hidden.</p>
+```
+
+#### Component Code
+```typescript
+@Component({...})
+export class ExampleComponent extends BaseComponent {
+  itemsHidden = false;
+  items = ["Item 1", "Item 2", "Item 3"];
+
+  toggleItemsVisibility() {
+    this.itemsHidden = !this.itemsHidden;
+  }
+}
+```
+
+---
+
 ## Contributing
 
 Fornax is a young project aiming for a simple, productive development experience in the Bun ecosystem.
