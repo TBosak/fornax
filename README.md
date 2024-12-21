@@ -234,10 +234,6 @@ export class HelloWorld extends BaseComponent {
 
 ---
 
-Here’s a concise guide to the `*if` and `*for` directives for your `README.md`, including examples and usage instructions:
-
----
-
 ## Conditional and Iterative Rendering with `*if` and `*for`
 
 Fornax provides powerful directives for conditionally rendering elements (`*if`) and iterating over collections (`*for`). These directives simplify dynamic UI updates while keeping your templates clean and declarative.
