@@ -37,9 +37,10 @@ export default {
   port: 5000,
   plugins: [],
   entryPoints: [],
-  alternateStyleLoader: null
+  alternateStyleLoader: null,
 };
 ```
+
 Adjust as needed.
 
 ### Project Structure
@@ -149,9 +150,9 @@ Components must extend BaseComponent and use the Component decorator (similar to
 
 ```typescript
 @Component({
-  selector: 'selector-goes-here',
+  selector: "selector-goes-here",
   template: `html goes here`,
-  style: `style goes here`
+  style: `style goes here`,
 })
 export class SomeComponent extends BaseComponent {
   onInit(): void {

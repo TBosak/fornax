@@ -1,4 +1,5 @@
 import { BunPlugin } from "bun";
+import { BaseComponent } from "./BaseComponent";
 
 export interface Binding {
   eventName: string;
@@ -7,7 +8,7 @@ export interface Binding {
 
 export interface Route {
   path: string;
-  component: CustomElementConstructor;
+  component: typeof BaseComponent;
 }
 
 export interface FornaxConfig {

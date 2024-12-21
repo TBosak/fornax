@@ -4,7 +4,7 @@ import { Other } from "./app/components/other.component";
 
 export const routes: any[] = [
   { path: "/", component: HelloWorld },
-  { path: "/other", component: Other },
+  { path: "/:id", component: Other },
 ];
 
 addRouter("router-outlet", routes);

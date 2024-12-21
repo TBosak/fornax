@@ -1,5 +1,5 @@
 import { Component, BaseComponent } from "fornaxjs";
-
+// prettier-ignore
 @Component({
   selector: "app-other",
   template: `
@@ -14,6 +14,7 @@ import { Component, BaseComponent } from "fornaxjs";
 })
 export class Other extends BaseComponent {
   logClick(event: CustomEvent): void {
+    console.log("Route params:", this.params); // Debug log
     console.log("Button clicked! Event detail:", event.detail);
   }
 }

@@ -10,11 +10,11 @@ const globalStyles = (async () => {
     .filter(
       (link) =>
         !styleSheets.find(
-          (sheet) => sheet.href === (link as HTMLLinkElement).href
-        )
+          (sheet) => sheet.href === (link as HTMLLinkElement).href,
+        ),
     )
     .map((link) =>
-      fetch((link as HTMLLinkElement).href).then((res) => res.text())
+      fetch((link as HTMLLinkElement).href).then((res) => res.text()),
     );
   for (const sheet of styleSheets) {
     for (let i = 0; i < sheet.cssRules.length; i++) {

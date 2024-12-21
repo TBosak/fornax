@@ -81,7 +81,7 @@ export function Output(eventName?: string): PropertyDecorator {
       },
       set(newValue) {
         throw new Error(
-          `Cannot overwrite @Output property '${String(propertyKey)}'.`
+          `Cannot overwrite @Output property '${String(propertyKey)}'.`,
         );
       },
       configurable: true,
@@ -119,7 +119,7 @@ export function ViewChild(selector: string): PropertyDecorator {
         }
 
         console.warn(
-          `@ViewChild: Element with selector '${selector}' not found. Retrying...`
+          `@ViewChild: Element with selector '${selector}' not found. Retrying...`,
         );
         requestAnimationFrame(attemptToFindElement);
       };
@@ -150,7 +150,7 @@ export function ViewChildren(selector: string): PropertyDecorator {
         }
 
         console.warn(
-          `@ViewChild: Element with selector '${selector}' not found. Retrying...`
+          `@ViewChild: Element with selector '${selector}' not found. Retrying...`,
         );
         requestAnimationFrame(attemptToFindElement);
       };

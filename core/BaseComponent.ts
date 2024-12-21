@@ -5,7 +5,7 @@ import { Binding, ComponentConfig } from "./Models";
 import { globalStyles } from "./scripts/global-styles";
 
 export class BaseComponent extends HTMLElement {
-  __config: ComponentConfig;
+  public __config: ComponentConfig;
   template: Template;
   model: any;
   static inputs: string[] = [];
@@ -16,6 +16,7 @@ export class BaseComponent extends HTMLElement {
   private observer: IntersectionObserver;
   private _isConnected = false;
   private idleCallbackId: number | null = null;
+  public params: Readonly<Record<string, any>>;
 
   connectedCallback() {
     this._isConnected = true;
@@ -32,7 +33,7 @@ export class BaseComponent extends HTMLElement {
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     this.observer.observe(this);
@@ -124,7 +125,7 @@ export class BaseComponent extends HTMLElement {
     if (!this.__config?.template) return;
 
     const reactiveProps = this.extractTemplateProperties(
-      this.__config.template
+      this.__config.template,
     );
     const proto = Object.getPrototypeOf(this);
 
@@ -219,7 +220,7 @@ export class BaseComponent extends HTMLElement {
     const parser = Parser.sharedInstance();
     const renderResult = this.template.render(this.model, this) as [
       string,
-      Binding[]
+      Binding[],
     ];
     const [templateString, bindings] = renderResult;
 
@@ -246,7 +247,7 @@ export class BaseComponent extends HTMLElement {
           } else {
             console.warn(
               `Handler '${handlerName}' is not defined in component:`,
-              this
+              this,
             );
           }
         });

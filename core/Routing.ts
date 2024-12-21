@@ -1,19 +1,18 @@
 import { Router } from "@vaadin/router";
 import { BaseComponent } from "./BaseComponent";
 import type { Route } from "./Models";
-import { Component } from "./Decorators";
+import { Component, Output } from "./Decorators";
 
 export class RouterOutlet extends BaseComponent {
-  private router: Router | null = null;
+  public router: Router | null = null;
 
   constructor(private routes: Route[]) {
     super();
   }
 
   connectedCallback() {
-    super.connectedCallback(); // Ensure BaseComponent's connectedCallback is called
+    super.connectedCallback();
 
-    // Initialize the router only once
     if (!this.router) {
       this.router = new Router(this);
       this.setRoutes();
@@ -21,19 +20,26 @@ export class RouterOutlet extends BaseComponent {
   }
 
   private setRoutes() {
-    // Map the routes to the format expected by Vaadin Router
-    const input = this.routes.map((route: Route) => {
-      return {
-        path: route.path,
-        component: route.component["selector"], // Adjusted selector retrieval
-      };
-    });
+    const input = this.routes.map((route) => ({
+      path: route.path,
+      action: (context, commands) => {
+        // Create the component via Vaadin Router
+        let component = new route.component();
+        const element = commands.component(component["__config"]["selector"]);
+
+        // Now set your params
+        element["params"] = context.params;
+
+        // Return the newly created element to the router
+        return element;
+      },
+    }));
+
     this.router?.setRoutes(input);
   }
 
   disconnectedCallback() {
-    super.disconnectedCallback(); // Ensure BaseComponent's disconnectedCallback is called
-    // Optional: Clean up the router if needed
+    super.disconnectedCallback();
   }
 }
 

@@ -31,7 +31,7 @@ try {
       .map((file: any) => {
         const importPath = `${dir.replaceAll("\\", "/")}/${basename(
           file,
-          extname(file)
+          extname(file),
         )}`;
         return `import "${importPath}";`;
       })
@@ -42,7 +42,7 @@ try {
   const entryFile = join(process.cwd(), "main.ts");
   const routes = join(config.srcDir, "routes.ts");
   const extraEntryPoints = config.entryPoints.map((entry) =>
-    resolve(process.cwd(), entry)
+    resolve(process.cwd(), entry),
   );
 
   writeFileSync(entryFile, code, "utf-8");
@@ -54,7 +54,7 @@ try {
     outdir: config.distDir,
     target: "browser",
     splitting: true,
-    minify: true,
+    minify: false,
     plugins: [styles].concat(config.plugins),
     naming: {
       entry: "[name].[ext]",
@@ -64,7 +64,7 @@ try {
   if (initialLoad) {
     copyFolderRecursiveSync(
       join(config.srcDir, "assets"),
-      join(config.distDir, "assets")
+      join(config.distDir, "assets"),
     );
   }
 
