@@ -1,5 +1,6 @@
 import { BunPlugin } from "bun";
 import { BaseComponent } from "./BaseComponent";
+import { Commands } from "@vaadin/router";
 
 export interface Binding {
   eventName: string;
@@ -9,7 +10,13 @@ export interface Binding {
 export interface Route {
   path: string;
   component: typeof BaseComponent;
+  canActivate?: GuardFn | GuardFn[];
 }
+
+export type GuardFn = (
+  context: any,
+  commands: Commands
+) => boolean | Promise<boolean>;
 
 export interface FornaxConfig {
   srcDir: string;

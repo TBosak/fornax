@@ -20,22 +20,35 @@ export class RouterOutlet extends BaseComponent {
   }
 
   private setRoutes() {
-    const input = this.routes.map((route) => ({
+    const routes = this.routes.map((route) => ({
       path: route.path,
-      action: (context, commands) => {
-        // Create the component via Vaadin Router
+      action: async (context, commands) => {
+        if (route.canActivate) {
+          const guards = Array.isArray(route.canActivate)
+            ? route.canActivate
+            : [route.canActivate];
+
+          for (const guard of guards) {
+            const canContinue = await guard(context, commands);
+            if (!canContinue) {
+              return commands.prevent();
+            } else if (canContinue === true) {
+              continue;
+            } else {
+              return canContinue;
+            }
+          }
+        }
+
+        // If we reach here, all guards returned true (or no guards exist)
         let component = new route.component();
-        const element = commands.component(component["__config"]["selector"]);
-
-        // Now set your params
-        element["params"] = context.params;
-
-        // Return the newly created element to the router
-        return element;
+        const el = commands.component(component["__config"]["selector"]);
+        el["params"] = context.params;
+        return el;
       },
     }));
 
-    this.router?.setRoutes(input);
+    this.router.setRoutes(routes);
   }
 
   disconnectedCallback() {

@@ -11,7 +11,7 @@ import { Component, BaseComponent } from "fornaxjs";
       </ul>
       <ul>
         <li><a href="/">Hello World</a></li>
-        <li><a href="/other">Other</a></li>
+        <li><a href="/other/test">Other</a></li>
       </ul>
     </nav>
     <div class="container">
