@@ -327,6 +327,123 @@ export class ExampleComponent extends BaseComponent {
 
 ---
 
+# **Fornax API Framework**
+
+Fornax contains a lightweight, opinionated API framework built on **Bun** and **Hono** with first-class support for **TypeScript** decorators, validation using **Zod**, and automatic OpenAPI documentation generation. Simplify your API development with reusable models, robust validation, and seamless integration with Swagger.
+
+---
+
+### **Defining Models**
+
+Use decorators like `@String`, `@Number`, and `@ISODate` to define your models with validation rules and OpenAPI metadata:
+
+```typescript
+import { Model, String, Number, ISODate, OptionalISODate } from 'fornax';
+
+@Model()
+export class Event {
+  @String({ example: '1', description: 'Unique identifier for the event' })
+  id: string;
+
+  @String({ example: 'Fornax Launch Party', description: 'Event name' })
+  name: string;
+
+  @ISODate({ example: '2023-12-21T15:30:00Z', description: 'Event start date and time' })
+  startTime: string;
+
+  @OptionalISODate({ example: '2023-12-22T15:30:00Z', description: 'Event end date and time' })
+  endTime?: string;
+
+  @Number({ example: 50, description: 'Number of attendees expected' })
+  attendees: number;
+}
+```
+
+---
+
+### **Defining Controllers**
+
+Define your controllers and routes using decorators like `@Controller`, `@Get`, and `@Post`. Secure your routes using the `@Auth` decorator.
+
+#### Example Controller with Authentication
+```typescript
+import { Controller, Get, Post } from 'fornax';
+import { Auth } from './auth-decorators';
+import { Event } from './models/Event';
+
+@Controller('/events')
+export class EventController {
+  @Get('/{id}', { params: Event }, Event)
+  @Auth(async (ctx) => {
+    const authHeader = ctx.req.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw { message: 'Unauthorized', status: 401 };
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const user = verifyToken(token); // Replace with your token verification logic
+    if (!user) {
+      throw { message: 'Invalid token', status: 403 };
+    }
+
+    ctx.user = user;
+  })
+  async getEvent(ctx: any) {
+    const { id } = ctx.req.valid('param');
+    return ctx.json({
+      id,
+      name: 'Fornax Launch Party',
+      startTime: '2023-12-21T15:30:00Z',
+      attendees: 50,
+    });
+  }
+
+  @Post('/', { body: Event }, Event)
+  @Auth(async (ctx) => {
+    const authHeader = ctx.req.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw { message: 'Unauthorized', status: 401 };
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const user = verifyToken(token);
+    if (!user || user.role !== 'Admin') {
+      throw { message: 'Forbidden: Admin access required', status: 403 };
+    }
+
+    ctx.user = user;
+  })
+  async createEvent(ctx: any) {
+    const event = ctx.req.valid('json');
+    return ctx.json(event);
+  }
+}
+```
+
+---
+
+### **Authentication Logic**
+
+The `@Auth` decorator enables you to define custom authentication logic for each route. This logic can include:
+
+- Token-based authentication
+- Role-based access control
+- Session validation
+
+---
+
+### **Key Features**
+
+- **TypeScript Decorators:** Simplify your API development with declarative decorators.
+- **Validation:** Built-in support for Zod schemas, including type-safe models and OpenAPI metadata.
+- **Authentication:** Secure your routes with customizable authentication logic using the `@Auth` decorator.
+- **Automatic OpenAPI Documentation:** Generate Swagger-compatible documentation effortlessly.
+- **Fast and Lightweight:** Built on **Bun** and **Hono** for high performance.
+
+Start building APIs faster and smarter with Fornax!
+
+---
+
 ## Contributing
 
 Fornax is a young project aiming for a simple, productive development experience in the Bun ecosystem.
