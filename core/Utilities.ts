@@ -9,7 +9,7 @@ import {
 import path from "path";
 import { HttpMethod } from "./Models";
 import { createRoute, z } from "@hono/zod-openapi";
-import { metadataRegistry } from "./scripts/constants";
+import { metadataRegistry, modelRegistry } from "./scripts/constants";
 
 export function ensureObject(o: any): object {
   return o != null && typeof o === "object" ? o : {};
@@ -115,43 +115,39 @@ export function Route(
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
-    console.log(`Registering route: ${method.toUpperCase()} ${path}`);
+    const paramsSchema = schemas.params
+      ? modelRegistry.get(schemas.params.name)?.schema
+      : undefined;
+    const bodySchema = schemas.body
+      ? modelRegistry.get(schemas.body.name)?.schema
+      : undefined;
+    const responseSchema = responseModel
+      ? modelRegistry.get(responseModel.name)?.schema
+      : undefined;
 
-    // Debugging metadata keys
-    console.log(`Target: ${target.constructor.name}, Method: ${propertyKey}`);
+    if (!paramsSchema && schemas.params) {
+      console.warn(`Schema for params not found: ${schemas.params.name}`);
+    }
+    if (!bodySchema && schemas.body) {
+      console.warn(`Schema for body not found: ${schemas.body.name}`);
+    }
+    if (!responseSchema && responseModel) {
+      console.warn(`Schema for response not found: ${responseModel.name}`);
+    }
 
     const route = createRoute({
       method,
       path,
-      request: {
-        params: schemas.params
-          ? metadataRegistry.get(schemas.params.name)?.schema
-          : undefined,
-        body: schemas.body
-          ? metadataRegistry.get(schemas.body.name)?.schema
-          : undefined,
-      },
+      request: { params: paramsSchema, body: bodySchema },
       responses: {
         200: {
           description: "Successful response",
-          content: {
-            "application/json": {
-              schema: metadataRegistry.get(responseModel.name)?.schema,
-            },
-          },
+          content: { "application/json": { schema: responseSchema } },
         },
       },
     });
 
-    metadataRegistry.set(`${target.constructor.name}.${propertyKey}`, {
-      route,
-    });
-
-    // Debugging stored metadata
-    const routeMetadata = metadataRegistry.get(
-      `${target.constructor.name}.${propertyKey}`
-    );
-    console.log("Route Metadata Retrieved:", routeMetadata);
+    metadataRegistry.set(`${method.toUpperCase()} ${path}`, { route });
   };
 }
 

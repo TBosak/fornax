@@ -9,7 +9,7 @@ export class EventController extends ControllerBase {
     return this.Ok(ctx, event);
   }
 
-  @Get("/{id}", { params: Event }, Event)
+  @Get("/:id", { params: Event }, Event)
   async getEvent(ctx: any) {
     const { id } = ctx.req.valid("param");
     return this.Ok(ctx, {

@@ -204,7 +204,7 @@ export function Model() {
     const schema = generateZodSchema(constructor.prototype);
     console.log(`Registering model: ${constructor.name}`, schema);
 
-    metadataRegistry.set(constructor.name, { schema }); // Use string key
+    modelRegistry.set(constructor.name, { schema });
   };
 }
 
