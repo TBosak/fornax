@@ -4,9 +4,12 @@ import {
   readdirSync,
   lstatSync,
   copyFileSync,
+  readFileSync,
 } from "fs";
 import path from "path";
-import { minifyCSS } from "../build/release";
+import { HttpMethod } from "./Models";
+import { createRoute, z } from "@hono/zod-openapi";
+import { metadataRegistry } from "./scripts/constants";
 
 export function ensureObject(o: any): object {
   return o != null && typeof o === "object" ? o : {};
@@ -84,4 +87,95 @@ export function toCamelCase(str: string): string {
   return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
 }
 
-export { minifyCSS };
+export function getProjectInfo(): any {
+  try {
+    const packageJsonPath = path.join(process.cwd(), "package.json");
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
+    return {
+      title: packageJson.name || "Unknown Project",
+      description: packageJson.description || "",
+      version: packageJson.version || "0.0.0",
+    };
+  } catch (error) {
+    console.error("Error reading package.json:", error);
+    return "Unknown Project";
+  }
+}
+
+// Server Utilities
+
+export function Route(
+  method: HttpMethod,
+  path: string,
+  schemas: { params?: any; body?: any; query?: any },
+  responseModel: any
+) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) {
+    console.log(`Registering route: ${method.toUpperCase()} ${path}`);
+
+    // Debugging metadata keys
+    console.log(`Target: ${target.constructor.name}, Method: ${propertyKey}`);
+
+    const route = createRoute({
+      method,
+      path,
+      request: {
+        params: schemas.params
+          ? metadataRegistry.get(schemas.params.name)?.schema
+          : undefined,
+        body: schemas.body
+          ? metadataRegistry.get(schemas.body.name)?.schema
+          : undefined,
+      },
+      responses: {
+        200: {
+          description: "Successful response",
+          content: {
+            "application/json": {
+              schema: metadataRegistry.get(responseModel.name)?.schema,
+            },
+          },
+        },
+      },
+    });
+
+    metadataRegistry.set(`${target.constructor.name}.${propertyKey}`, {
+      route,
+    });
+
+    // Debugging stored metadata
+    const routeMetadata = metadataRegistry.get(
+      `${target.constructor.name}.${propertyKey}`
+    );
+    console.log("Route Metadata Retrieved:", routeMetadata);
+  };
+}
+
+export function getSchema(target: any): z.AnyZodObject {
+  const properties = metadataRegistry.get(target) || {};
+  const zodShape: Record<string, any> = {};
+
+  Object.keys(properties).forEach((key) => {
+    const { type, openapi } = properties[key];
+    const zodType = type.openapi(openapi); // Attach OpenAPI metadata
+    zodShape[key] = zodType;
+  });
+
+  return z.object(zodShape);
+}
+
+export function defineProperty(type: any, openapi: any = {}) {
+  return function (target: any, key: string) {
+    if (!metadataRegistry.has(target)) {
+      metadataRegistry.set(target, {});
+    }
+
+    const properties = metadataRegistry.get(target);
+    properties[key] = { type, openapi };
+    metadataRegistry.set(target, properties);
+  };
+}

@@ -6,18 +6,21 @@
     "fnx": "bun run ./core/scripts/cli.ts --silent=false"
   },
   "scripts": {
-    "asbuild": "asc assembly/*.ts --target release"
+    "postinstall": "bunx patch-package"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@hono/zod-openapi": "^0.18.3",
     "@types/bun": "latest",
     "@types/parse5": "^7.0.0",
     "@vaadin/router": "^2.0.0",
     "bun-style-loader": "^0.4.0",
+    "hono": "^4.6.14",
     "incremental-dom": "^0.7.0",
     "parse5": "^7.2.1",
+    "patch-package": "^8.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
@@ -25,19 +28,20 @@
     ".": {
       "import": "./index.ts",
       "types": [
-        "./build/release.d.ts",
         "./core.d.ts"
       ]
+    },
+    "./server": {
+      "import": "./server.ts",
+      "default": "./server.ts"
     }
   },
   "files": [
     "./index.ts",
+    "./server.ts",
     "./core",
     "./core/types/global.d.ts",
     "./build/release.d.ts"
   ],
-  "types": "./core/types/global.d.ts",
-  "devDependencies": {
-    "assemblyscript": "^0.27.31"
-  }
+  "types": "./core/types/global.d.ts"
 }

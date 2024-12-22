@@ -5,12 +5,10 @@ import { loadConfig } from "./load-config";
 
 // Define the directory paths
 const config = loadConfig();
-const rootDir = process.cwd();
-const backupDir = path.resolve(__dirname, "../../build"); // Define backup directory
 
 // Ensure the dist directory exists
-if (!existsSync(config.distDir)) {
-  mkdirSync(config.distDir);
+if (!existsSync(config.Client.distDir)) {
+  mkdirSync(config.Client.distDir);
 }
 
 const buildProc = Bun.spawn(["bun", `${__dirname}/build.ts`], {
@@ -65,7 +63,7 @@ function getContentType(ext: string): string {
 
 // Start the server
 serve({
-  port: 5000,
+  port: config.Client.port,
   async fetch(request) {
     const url = new URL(request.url);
     let pathname = url.pathname;
@@ -76,7 +74,7 @@ serve({
     }
 
     // Define the path to the requested file in the primary directory
-    let filePath = path.join(config.distDir, pathname);
+    let filePath = path.join(config.Client.distDir, pathname);
 
     // If the path is a directory, append 'index.html'
     if (pathname.endsWith("/")) {
@@ -88,14 +86,8 @@ serve({
       return await serveStatic(filePath);
     }
 
-    // Check if the file exists in the backup directory
-    const backupFilePath = path.join(backupDir, pathname);
-    if (existsSync(backupFilePath) && path.extname(backupFilePath)) {
-      return await serveStatic(backupFilePath);
-    }
-
     // For SPA routes, serve 'index.html'
-    const indexPath = path.join(config.distDir, "index.html");
+    const indexPath = path.join(config.Client.distDir, "index.html");
     if (existsSync(indexPath)) {
       return await serveStatic(indexPath);
     }
@@ -104,7 +96,7 @@ serve({
   },
 });
 
-console.log(`Server is running at http://localhost:5000`);
+console.log(`Client is running at http://localhost:${config.Client.port}`);
 
 process.on("SIGINT", () => {
   console.log("Received SIGINT. Cleaning up...");

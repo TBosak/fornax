@@ -1,5 +1,7 @@
 {
   "name": "test",
+  "description": "Test App",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "start": "fnx dev"
@@ -10,5 +12,8 @@
   "peerDependencies": {
     "typescript": "^5.0.0",
     "fornaxjs": "link:fornaxjs"
+  },
+  "dependencies": {
+    "@hono/zod-openapi": "^0.18.3"
   }
 }

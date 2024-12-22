@@ -8,7 +8,7 @@ import { loadConfig } from "./load-config";
 export async function runCommand(
   cmd: string,
   args: string[],
-  options: any = {},
+  options: any = {}
 ) {
   const proc = spawnSync({
     cmd: [cmd, ...args],
@@ -18,7 +18,7 @@ export async function runCommand(
   });
   if (proc.exitCode !== 0) {
     console.error(
-      `Command "${cmd} ${args.join(" ")}" failed with code ${proc.exitCode}`,
+      `Command "${cmd} ${args.join(" ")}" failed with code ${proc.exitCode}`
     );
     process.exit(proc.exitCode || 1);
   }
@@ -27,7 +27,7 @@ export async function runCommand(
 export async function runInBackground(
   cmd: string,
   args: string[],
-  options: any = {},
+  options: any = {}
 ) {
   const proc = spawn({
     cmd: [cmd, ...args],
@@ -40,18 +40,26 @@ export async function runInBackground(
 
 async function dev() {
   // Generate imports
-  const backendProc = await runInBackground("bun", [
-    `${__dirname}/index.ts`,
+  const clientProc = await runInBackground("bun", [
+    `${__dirname}/client.ts`,
     "--watch",
   ]);
+  const serverProc = Bun.spawn(["bun", `${__dirname}/server.ts`], {
+    cwd: process.cwd(),
+    env: process.env,
+    stdout: "inherit",
+    stderr: "inherit",
+  });
 
   process.on("SIGINT", () => {
-    backendProc.kill();
+    clientProc.kill();
+    serverProc.kill();
     process.exit(0);
   });
 
   process.on("SIGTERM", () => {
-    backendProc.kill();
+    clientProc.kill();
+    serverProc.kill();
     process.exit(0);
   });
 }
@@ -64,20 +72,28 @@ async function build() {
 
 async function start(config: FornaxConfig) {
   // Ensure dist is built
-  if (!existsSync(resolve(config.distDir))) {
+  if (!existsSync(resolve(config.Client.distDir))) {
     console.log("Dist directory not found. Running build...");
     await build();
   }
 
   // Start server without watch
-  const serverProc = await runInBackground("bun", [`${__dirname}/index.ts`]);
+  const clientProc = await runInBackground("bun", [`${__dirname}/client.ts`]);
+  const serverProc = Bun.spawn(["bun", `${__dirname}/server.ts`], {
+    cwd: process.cwd(),
+    env: process.env,
+    stdout: "inherit",
+    stderr: "inherit",
+  });
 
   process.on("SIGINT", () => {
+    clientProc.kill();
     serverProc.kill();
     process.exit(0);
   });
 
   process.on("SIGTERM", () => {
+    clientProc.kill();
     serverProc.kill();
     process.exit(0);
   });
