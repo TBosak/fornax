@@ -327,7 +327,7 @@ export class ExampleComponent extends BaseComponent {
 
 ---
 
-# **Fornax API Framework**
+# **Fornax API Framework (WIP - NOT FUNCTIONAL)**
 
 Fornax contains a lightweight, opinionated API framework built on **Bun** and **Hono** with first-class support for **TypeScript** decorators, validation using **Zod**, and automatic OpenAPI documentation generation. Simplify your API development with reusable models, robust validation, and seamless integration with Swagger.
 
