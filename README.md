@@ -39,13 +39,20 @@ Create a `fornax.config.ts` in your project’s root to configure directories, p
 
 ```typescript
 export default {
-  srcDir: "./src",
-  distDir: "./dist",
-  port: 5000,
-  plugins: [],
-  entryPoints: [],
-  alternateStyleLoader: null,
+  Client: {
+    srcDir: "./src/client",
+    distDir: "./dist",
+    port: 5000,
+    plugins: [],
+    entryPoints: [],
+    alternateStyleLoader: null,
+  },
+  Server: {
+    dir: "./src/server",
+    port: 5500,
+  },
 };
+
 ```
 
 Adjust as needed.
