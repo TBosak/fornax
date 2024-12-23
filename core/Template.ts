@@ -8,7 +8,7 @@ export class Template {
   >();
 
   public source: string | Function | null = null;
-  public render: (data?: any, scope?: any) => [string, Binding[]] = null;
+  public render: (data?: any, scope?: any) => [string, Binding[]];
 
   static createPartial(
     str: string,

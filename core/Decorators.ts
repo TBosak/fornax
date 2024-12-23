@@ -3,8 +3,14 @@ import { ComponentConfig } from "./Models";
 import { Context } from "./Context";
 import "reflect-metadata";
 import { defineProperty, Route } from "./Utilities";
-import { app, metadataRegistry, modelRegistry } from "./scripts/constants";
+import {
+  controllerRegistry,
+  metadataRegistry,
+  modelRegistry,
+  openAPIRegistry,
+} from "./scripts/constants";
 import { z } from "@hono/zod-openapi";
+import { ControllerBase } from "./ControllerBase";
 
 //Client Decorators
 
@@ -166,7 +172,6 @@ export function ViewChildren(selector: string): PropertyDecorator {
 }
 
 // Server Decorators
-
 export const Get = (path: string, schemas: any, responseSchema: any) =>
   Route("get", path, schemas, responseSchema);
 export const Post = (path: string, schemas: any, responseSchema: any) =>
@@ -177,14 +182,46 @@ export const Delete = (path: string, schemas: any, responseSchema: any) =>
   Route("delete", path, schemas, responseSchema);
 
 export function Controller(basePath: string) {
-  return function (constructor: Function) {
-    const instance = new (constructor as any)();
-    if (instance.router) {
-      app.route(basePath, instance.router);
+  return function (constructor: { new (): ControllerBase }) {
+    const instance = new constructor();
+    if (!(instance instanceof ControllerBase)) {
+      throw new Error("Controllers must extend ControllerBase");
     }
+    controllerRegistry.set(basePath, instance);
   };
 }
 
+export function Model() {
+  return function (constructor: Function) {
+    const className = constructor.name;
+    const properties = metadataRegistry.get(className) || {};
+
+    const zodShape: Record<string, any> = {};
+    Object.entries(properties).forEach(([key, value]) => {
+      const { type, openapi } = value;
+
+      if (type.openapi && typeof type.openapi === "function") {
+        zodShape[key] = type.openapi({
+          ...openapi,
+          description: openapi?.description || `Property ${key}`,
+          example: openapi?.example || null,
+        });
+      } else {
+        console.warn(`Property "${key}" is missing openapi support.`);
+      }
+    });
+
+    const schema = z.object(zodShape).openapi(className, {
+      title: className,
+      description: `Schema for ${className}`,
+    });
+
+    openAPIRegistry.register(className, schema);
+    modelRegistry.set(className, { schema });
+  };
+}
+
+//TEST FUNCTIONALITY
 export function Middleware(middleware: (ctx: any, next: Function) => void) {
   return function (
     target: any,
@@ -199,29 +236,6 @@ export function Middleware(middleware: (ctx: any, next: Function) => void) {
   };
 }
 
-export function Model() {
-  return function (constructor: Function) {
-    const schema = generateZodSchema(constructor.prototype);
-    console.log(`Registering model: ${constructor.name}`, schema);
-
-    modelRegistry.set(constructor.name, { schema });
-  };
-}
-
-function generateZodSchema(prototype: any): z.ZodObject<any> {
-  const properties = Object.getOwnPropertyNames(prototype);
-  const zodShape: Record<string, z.ZodTypeAny> = {};
-
-  for (const key of properties) {
-    const property = prototype[key];
-    if (property?.type && property?.openapi) {
-      zodShape[key] = property.type.openapi(property.openapi);
-    }
-  }
-
-  return z.object(zodShape);
-}
-
 export function Property(type: z.ZodTypeAny, openapi: any = {}) {
   return function (target: any, key: string) {
     if (!metadataRegistry.has(target)) {
@@ -229,6 +243,7 @@ export function Property(type: z.ZodTypeAny, openapi: any = {}) {
     }
 
     const properties = metadataRegistry.get(target);
+    if (!properties) return;
     properties[key] = { type, openapi };
     metadataRegistry.set(target, properties);
   };
@@ -324,6 +339,7 @@ export function OptionalNumberRange(
   });
 }
 
+//TEST FUNCTIONALITY
 export function Auth(
   authLogic: (ctx: any) => Promise<void> | void,
   openapi: any = { security: [{ bearerAuth: [] }] }

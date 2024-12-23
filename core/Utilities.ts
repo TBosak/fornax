@@ -9,7 +9,12 @@ import {
 import path from "path";
 import { HttpMethod } from "./Models";
 import { createRoute, z } from "@hono/zod-openapi";
-import { metadataRegistry, modelRegistry } from "./scripts/constants";
+import {
+  metadataRegistry,
+  modelRegistry,
+  routeRegistry,
+} from "./scripts/constants";
+import { ZodOpenAPIMetadata } from "@asteasolutions/zod-to-openapi";
 
 export function ensureObject(o: any): object {
   return o != null && typeof o === "object" ? o : {};
@@ -117,37 +122,33 @@ export function Route(
   ) {
     const paramsSchema = schemas.params
       ? modelRegistry.get(schemas.params.name)?.schema
-      : undefined;
+      : null;
     const bodySchema = schemas.body
       ? modelRegistry.get(schemas.body.name)?.schema
-      : undefined;
+      : null;
+    const querySchema = schemas.query
+      ? modelRegistry.get(schemas.query.name)?.schema
+      : null;
     const responseSchema = responseModel
       ? modelRegistry.get(responseModel.name)?.schema
-      : undefined;
+      : null;
 
-    if (!paramsSchema && schemas.params) {
-      console.warn(`Schema for params not found: ${schemas.params.name}`);
-    }
-    if (!bodySchema && schemas.body) {
-      console.warn(`Schema for body not found: ${schemas.body.name}`);
-    }
-    if (!responseSchema && responseModel) {
-      console.warn(`Schema for response not found: ${responseModel.name}`);
-    }
+    const controllerName = target.constructor.name;
+    const routes = routeRegistry.get(controllerName) || [];
 
-    const route = createRoute({
+    // Store route details including schemas
+    routes.push({
       method,
       path,
-      request: { params: paramsSchema, body: bodySchema },
-      responses: {
-        200: {
-          description: "Successful response",
-          content: { "application/json": { schema: responseSchema } },
-        },
+      handler: propertyKey,
+      schemas: {
+        params: paramsSchema,
+        body: bodySchema,
+        query: querySchema,
+        response: responseSchema,
       },
     });
-
-    metadataRegistry.set(`${method.toUpperCase()} ${path}`, { route });
+    routeRegistry.set(controllerName, routes);
   };
 }
 
@@ -166,12 +167,15 @@ export function getSchema(target: any): z.AnyZodObject {
 
 export function defineProperty(type: any, openapi: any = {}) {
   return function (target: any, key: string) {
-    if (!metadataRegistry.has(target)) {
-      metadataRegistry.set(target, {});
+    const className = target.constructor.name;
+
+    // Initialize metadata for the class if it doesn't exist
+    if (!metadataRegistry.has(className)) {
+      metadataRegistry.set(className, {});
     }
 
-    const properties = metadataRegistry.get(target);
-    properties[key] = { type, openapi };
-    metadataRegistry.set(target, properties);
+    const properties = metadataRegistry.get(className)!;
+    properties[key] = { type, openapi }; // Add type and OpenAPI metadata
+    metadataRegistry.set(className, properties);
   };
 }

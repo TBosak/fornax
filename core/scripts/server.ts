@@ -2,16 +2,34 @@ import { getProjectInfo } from "../Utilities";
 import { readdirSync } from "fs";
 import path from "path";
 import { loadConfig } from "./load-config";
-import { app, metadataRegistry, modelRegistry } from "./constants";
+import {
+  app,
+  controllerRegistry,
+  openAPIRegistry,
+  routeRegistry,
+} from "./constants";
+import { OpenApiGeneratorV3 } from "@asteasolutions/zod-to-openapi";
+import { swaggerUI } from "@hono/swagger-ui";
 
 const info = getProjectInfo();
 const config = loadConfig();
+
 if (isNaN(config.Server.port)) {
   console.error("Invalid port configuration");
   process.exit(1);
 }
 
 async function loadConsumingProjectModules() {
+  const loadModules = async (dir: string, type: string) => {
+    const files = readdirSync(dir).filter(
+      (file) => file.endsWith(".ts") || file.endsWith(".js")
+    );
+    for (const file of files) {
+      console.log(`Loading ${type}: ${file}`);
+      await import(path.resolve(dir, file));
+    }
+  };
+
   const controllersDir = path.resolve(
     process.cwd(),
     config.Server.dir,
@@ -19,54 +37,148 @@ async function loadConsumingProjectModules() {
   );
   const modelsDir = path.resolve(process.cwd(), config.Server.dir, "models");
 
-  const controllerFiles = readdirSync(controllersDir).filter(
-    (file) => file.endsWith(".ts") || file.endsWith(".js")
-  );
-  for (const file of controllerFiles) {
-    console.log(`Loading controller: ${file}`);
-    await import(path.resolve(controllersDir, file));
-  }
-
-  const modelFiles = readdirSync(modelsDir).filter(
-    (file) => file.endsWith(".ts") || file.endsWith(".js")
-  );
-  for (const file of modelFiles) {
-    console.log(`Loading model: ${file}`);
-    await import(path.resolve(modelsDir, file));
-  }
+  await loadModules(controllersDir, "controller");
+  await loadModules(modelsDir, "model");
 }
 
-// Main function to load modules and start the server
+function generateOpenApiPaths() {
+  const paths: Record<string, any> = {};
+
+  controllerRegistry.forEach((controller, basePath) => {
+    const routes = routeRegistry.get(controller.constructor.name) || [];
+
+    routes.forEach(({ method, path, schemas }) => {
+      const fullPath = `${basePath}${path}`;
+
+      if (!paths[fullPath]) {
+        paths[fullPath] = {};
+      }
+
+      const operation: Record<string, any> = {
+        summary: `${method.toUpperCase()} ${fullPath} endpoint`,
+        responses: {
+          200: {
+            description: "Successful response",
+            content: {
+              "application/json": {
+                schema: getMetadata(schemas?.response)
+                  ? {
+                      $ref: `#/components/schemas/${
+                        getMetadata(schemas?.response).title
+                      }`,
+                    }
+                  : { type: "object" },
+              },
+            },
+          },
+        },
+      };
+
+      if (schemas.params) {
+        operation.parameters = [
+          {
+            name: "params",
+            in: "path",
+            required: true,
+            schema: getMetadata(schemas?.params)
+              ? {
+                  $ref: `#/components/schemas/${
+                    getMetadata(schemas?.params).title
+                  }`,
+                }
+              : { type: "object" },
+          },
+        ];
+      }
+
+      if (schemas.query) {
+        operation.parameters = operation.parameters || [];
+        operation.parameters.push({
+          name: "query",
+          in: "query",
+          required: false,
+          schema: getMetadata(schemas?.query)
+            ? {
+                $ref: `#/components/schemas/${
+                  getMetadata(schemas?.query).title
+                }`,
+              }
+            : { type: "object" },
+        });
+      }
+
+      if (schemas.body) {
+        operation.requestBody = {
+          required: true,
+          content: {
+            "application/json": {
+              schema: getMetadata(schemas?.body)
+                ? {
+                    $ref: `#/components/schemas/${
+                      getMetadata(schemas?.body).title
+                    }`,
+                  }
+                : { type: "object" },
+            },
+          },
+        };
+      }
+
+      paths[fullPath][method.toLowerCase()] = operation;
+    });
+  });
+
+  return paths;
+}
+
+function getMetadata(schema: any) {
+  if (schema?._def?.openapi?.metadata) {
+    return {
+      title: schema._def.openapi.metadata.title,
+      description: schema._def.openapi.metadata.description,
+    };
+  }
+  if (schema?._def?.openapi?._internal?.refId) {
+    return { title: schema._def.openapi._internal.refId };
+  }
+  return {};
+}
+
 async function main() {
   await loadConsumingProjectModules();
-  console.log(
-    "Metadata Registry Contents:",
-    Array.from(metadataRegistry.entries())
-  );
-  for (const [key, value] of metadataRegistry.entries()) {
-    console.log(`Processing route for: ${key}`);
-    console.log("Route metadata:", value.route);
 
-    if (value.route && typeof value.route.path === "string") {
-      console.log("Registering route:", value.route);
-      app.route(value.route, app);
-    } else {
-      console.warn(`Invalid route configuration for ${key}:`, value.route);
-    }
-  }
-
-  app.doc("/doc", {
-    openapi: "3.0.0",
-    info: {
-      version: info.version,
-      title: info.title,
-      description: info.description,
-    },
+  controllerRegistry.forEach((controller, basePath) => {
+    const routes = routeRegistry.get(controller.constructor.name) || [];
+    routes.forEach((route) => {
+      controller[route.method](
+        route.path,
+        controller[route.handler].bind(controller)
+      );
+    });
+    app.route(basePath, controller);
   });
+
+  app.get("/doc", async (ctx: any) => {
+    const generator = new OpenApiGeneratorV3(openAPIRegistry.definitions);
+    const spec = generator.generateDocument({
+      openapi: "3.0.0",
+      info: {
+        version: info.version,
+        title: info.title || "API Documentation",
+        description: info.description || "OpenAPI Specification",
+      },
+      servers: [{ url: "v1" }],
+    });
+
+    spec.paths = generateOpenApiPaths();
+
+    return ctx.json(spec);
+  });
+
+  app.get("/swagger", swaggerUI({ url: "/doc" }));
 
   console.log(`API is running at http://localhost:${config.Server.port}`);
 
-  // Start the server
   Bun.serve({
     fetch: app.fetch,
     port: config.Server.port,

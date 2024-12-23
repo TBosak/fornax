@@ -11,7 +11,7 @@ export class EventController extends ControllerBase {
 
   @Get("/:id", { params: Event }, Event)
   async getEvent(ctx: any) {
-    const { id } = ctx.req.valid("param");
+    const { id } = ctx.req.param("id");
     return this.Ok(ctx, {
       id,
       name: "Fornax Launch Party",
