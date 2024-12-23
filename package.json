@@ -1,6 +1,6 @@
 {
   "name": "fornaxjs",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "type": "module",
   "bin": {
     "fnx": "bun run ./core/scripts/cli.ts --silent=false"
