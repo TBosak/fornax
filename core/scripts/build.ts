@@ -5,9 +5,12 @@ import { join } from "path";
 const config = loadConfig();
 
 (async () => {
-  readdirSync(config.srcDir).forEach((file) => {
+  readdirSync(config.Client.srcDir).forEach((file) => {
     if (file.endsWith(".html") || file.endsWith(".ico")) {
-      copyFileSync(join(config.srcDir, file), join(config.distDir, file));
+      copyFileSync(
+        join(config.Client.srcDir, file),
+        join(config.Client.distDir, file)
+      );
     }
   });
 
@@ -19,7 +22,7 @@ const config = loadConfig();
       env: process.env,
       stdout: "inherit",
       stderr: "inherit",
-    },
+    }
   );
   await childProc.exited;
 })();

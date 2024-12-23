@@ -19,12 +19,18 @@ export type GuardFn = (
 ) => boolean | Promise<boolean>;
 
 export interface FornaxConfig {
-  srcDir: string;
-  distDir: string;
-  port: number;
-  plugins: BunPlugin[];
-  entryPoints: string[];
-  alternateStyleLoader?: BunPlugin;
+  Client: {
+    srcDir: string;
+    distDir: string;
+    port: number;
+    plugins: BunPlugin[];
+    entryPoints: string[];
+    alternateStyleLoader?: BunPlugin;
+  };
+  Server: {
+    dir: string;
+    port: number;
+  };
 }
 
 export class ComponentConfig {
@@ -39,3 +45,5 @@ export class ComponentConfig {
 export interface ServiceOptions {
   singleton?: boolean;
 }
+
+export type HttpMethod = "get" | "post" | "put" | "delete";

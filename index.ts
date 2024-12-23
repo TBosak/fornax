@@ -1,4 +1,3 @@
-import * as wasm from "./build/release.js";
 import { BaseComponent } from "./core/BaseComponent";
 import {
   Component,
@@ -22,6 +21,5 @@ export {
   RouterOutlet,
   Service,
   Context,
-  wasm,
   addRouter,
 };

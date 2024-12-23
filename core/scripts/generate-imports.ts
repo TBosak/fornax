@@ -9,11 +9,11 @@ const config = loadConfig();
 try {
   const args = process.argv.slice(2);
   const initialLoad = args[0] === "true" || false;
-  clearChunks(config.distDir);
-  const componentsDir = resolve(config.srcDir, "./app/components");
-  const servicesDir = resolve(config.srcDir, "./app/services");
-  const srcDir = resolve(config.srcDir);
-  const srcFiles = readdirSync(config.srcDir);
+  clearChunks(config.Client.distDir);
+  const componentsDir = resolve(config.Client.srcDir, "./app/components");
+  const servicesDir = resolve(config.Client.srcDir, "./app/services");
+  const srcDir = resolve(config.Client.srcDir);
+  const srcFiles = readdirSync(config.Client.srcDir);
   const componentFiles = readdirSync(componentsDir);
   const serviceFiles = readdirSync(servicesDir);
   const imports =
@@ -31,7 +31,7 @@ try {
       .map((file: any) => {
         const importPath = `${dir.replaceAll("\\", "/")}/${basename(
           file,
-          extname(file),
+          extname(file)
         )}`;
         return `import "${importPath}";`;
       })
@@ -40,22 +40,22 @@ try {
 
   const code = imports;
   const entryFile = join(process.cwd(), "main.ts");
-  const routes = join(config.srcDir, "routes.ts");
-  const extraEntryPoints = config.entryPoints.map((entry) =>
-    resolve(process.cwd(), entry),
+  const routes = join(config.Client.srcDir, "routes.ts");
+  const extraEntryPoints = config.Client.entryPoints.map((entry) =>
+    resolve(process.cwd(), entry)
   );
 
   writeFileSync(entryFile, code, "utf-8");
-  const styles = config.alternateStyleLoader
-    ? config.alternateStyleLoader
+  const styles = config.Client.alternateStyleLoader
+    ? config.Client.alternateStyleLoader
     : styleLoader();
   const build = await Bun.build({
     entrypoints: [entryFile, routes, ...extraEntryPoints],
-    outdir: config.distDir,
+    outdir: config.Client.distDir,
     target: "browser",
     splitting: true,
     minify: false,
-    plugins: [styles].concat(config.plugins),
+    plugins: [styles].concat(config.Client.plugins),
     naming: {
       entry: "[name].[ext]",
     },
@@ -63,8 +63,8 @@ try {
 
   if (initialLoad) {
     copyFolderRecursiveSync(
-      join(config.srcDir, "assets"),
-      join(config.distDir, "assets"),
+      join(config.Client.srcDir, "assets"),
+      join(config.Client.distDir, "assets")
     );
   }
 
