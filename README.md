@@ -50,14 +50,21 @@ A typical Fornax project might look like this:
 ```
 project/
 ├─ src/
-│  ├─ index.html
-│  ├─ routes.ts
-│  ├─ app.component.ts
-│  ├─ app/
+|  ├─ client/
+│  |  ├─ index.html
+│  |  ├─ routes.ts
+│  |  ├─ app.component.ts
+│  |  ├─ app/
 │  │  ├─ components/
 │  │  │   ├─ some.component.ts
 │  │  │   ├─ other.component.ts
 │  │  ├─ assets/
+|  |  ├─ services/
+|  ├─ server/
+|  |  ├─ controllers/
+|  |  |   ├─ event.controller.ts
+|  |  ├─ models/
+|  |  |   ├─ event.ts
 ├─ fornax.config.ts
 └─ main.ts
 ```
