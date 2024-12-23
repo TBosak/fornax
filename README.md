@@ -482,5 +482,13 @@ Implementing standalone components and Angular-like module system? Right now I'm
 ~~Clean up dist folder chunks on build~~ <br>
 ~~More granular builds to avoid replacing all files in dist on every code change~~ <br>
 Configure CSS minification on build <br>
+Test API framework middleware & auth decorators <br>
+Create middleware registry <br>
+Test CORS middleware <br>
+Clean up folder structure - make it a little more intuitive <br>
+Create example projects <br>
+GraphQL support <br>
+Build out a unit testing framework <br>
+Integrate style preprocessors to handle SCSS or LESS <br>
 SCHEMATICS <br>
 ...
