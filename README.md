@@ -2,7 +2,7 @@
   
 <img width="150px" src="https://github.com/user-attachments/assets/cbe98a21-31f1-4209-af64-8a43f058f3cf">
 <h1>Fornax</h1>
-Fornax is a lightweight, opinionated, and highly customizable Bun-powered web framework designed to simplify building single-page applications with custom components, routing, and flexible styling options.
+Fornax is a lightweight, opinionated, and highly customizable Bun-powered full-stack web framework designed to simplify building single-page applications with custom components, routing, and flexible styling options.
 </div><br>
 
 **Key Features:**
@@ -329,7 +329,7 @@ export class ExampleComponent extends BaseComponent {
 
 # **Fornax API Framework**
 
-Fornax contains a lightweight, opinionated API framework built on **Bun** and **Hono** with first-class support for **TypeScript** decorators, validation using **Zod**, and automatic OpenAPI documentation and Swagger generation. Simplify your API development with reusable models, robust validation, and seamless integration with Swagger.
+Fornax contains a lightweight, opinionated declarative API framework built on **Bun** and **Hono** with first-class support for **TypeScript** decorators, validation using **Zod**, and automatic OpenAPI documentation and Swagger generation. Simplify your API development with reusable models, robust validation, and seamless integration with Swagger.
 
 ---
 
