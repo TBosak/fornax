@@ -5,9 +5,6 @@
   "bin": {
     "fnx": "bun run ./core/scripts/cli.ts --silent=false"
   },
-  "scripts": {
-    "postinstall": "bunx patch-package"
-  },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
@@ -22,10 +19,8 @@
     "hono": "^4.6.14",
     "incremental-dom": "^0.7.0",
     "parse5": "^7.2.1",
-    "patch-package": "^8.0.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1",
-    "zod-to-openapi": "^0.2.1"
+    "rxjs": "^7.8.1"
   },
   "exports": {
     ".": {
