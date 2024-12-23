@@ -1,27 +1,34 @@
 <div align="center">
   
 <img width="150px" src="https://github.com/user-attachments/assets/cbe98a21-31f1-4209-af64-8a43f058f3cf">
-<h1>Fornax</h1>
+
+<h1>Fornax
+
+![GitHub Repo stars](https://img.shields.io/github/stars/tbosak/fornax)
+![NPM Downloads](https://img.shields.io/npm/dw/fornaxjs)
+![GitHub package.json version](https://img.shields.io/github/package-json/v/tbosak/fornax)
+![GitHub last commit](https://img.shields.io/github/last-commit/tbosak/fornax)
+
+</h1>
+<br>
+</div>
 Fornax is a lightweight, opinionated, and highly customizable Bun-powered full-stack web framework designed to simplify building single-page applications with custom components, routing, and flexible styling options.
-</div><br>
+<br>
 
-**Key Features:**
-
-- **Custom Components:** Define reusable UI elements using decorators and TypeScript classes.
-- **Routing Made Easy:** Leverage a `<router-outlet>` and a straightforward `routes.ts` configuration for SPA navigation.
-- **Flexible Styling Modes:** Choose between scoped and global styling for your components.
-- **TypeScript by Default:** Enjoy type safety and clean code with TypeScript integration.
+**Key Features** 🔑
+- **Custom Components** 🧩: Define reusable UI elements using decorators and TypeScript classes.
+- **Routing Made Easy** 🗺️: Leverage a `<router-outlet>` and a straightforward `routes.ts` configuration for SPA navigation.
+- **Flexible Styling Modes** 🎨: Choose between scoped and global styling for your components.
+- **TypeScript by Default** 💻: Enjoy type safety and clean code with TypeScript integration.
 
 ---
 
-## Getting Started
+## Getting Started 🏁
 
-### Prerequisites
+### Prerequisites ✅
+- **Bun** 🍞: Install Bun from [https://bun.sh/](https://bun.sh/)
 
-- **Bun:** Install Bun from [https://bun.sh/](https://bun.sh/)
-
-### Installation
-
+### Installation ⚙️
 Add Fornax to your existing Bun project:
 
 ```bash
@@ -43,7 +50,7 @@ export default {
 
 Adjust as needed.
 
-### Project Structure
+### Project Structure 🗂️
 
 A typical Fornax project might look like this:
 
@@ -74,7 +81,7 @@ project/
 - `routes.ts`: Defines the application’s client-side routes.
 - `app/components/`: Store your custom components here.
 
-### Running the Dev Server
+### Running the Dev Server 🔧
 
 ```bash
 fnx dev
@@ -84,7 +91,7 @@ This starts:
 
 - Bun as a back-end/static server with watch mode.
 
-### Building for Production
+### Building for Production 🏗️
 
 ```bash
 fnx build
@@ -92,7 +99,7 @@ fnx build
 
 Outputs bundled files into the `dist` directory.
 
-### Starting the App
+### Starting the App 🏃
 
 After building, start the server without watch mode:
 
@@ -104,7 +111,7 @@ Open `http://localhost:5000` to view your application.
 
 ---
 
-## Styling Modes
+## Styling Modes 🎨
 
 Fornax supports two style modes for your components:
 
@@ -115,7 +122,7 @@ This is configured in the Component decorator.
 
 ---
 
-## Routing
+## Routing 🛣️
 
 Define routes in `routes.ts`:
 
@@ -151,9 +158,9 @@ Use client-side routing by preventing full page reloads and leveraging the `<som
 
 ---
 
-## Components and Services
+## Components and Services 🧩
 
-Components must extend BaseComponent and use the Component decorator (similar to Angular):
+Components must extend `BaseComponent` and use the `Component` decorator (similar to Angular):
 
 ```typescript
 @Component({
@@ -172,21 +179,22 @@ export class SomeComponent extends BaseComponent {
 }
 ```
 
-You can import html or css into your component using Bun pre-configured loaders:
+You can import HTML or CSS into your component using Bun pre-configured loaders:
 
 ```typescript
 import { Component, BaseComponent } from "fornaxjs";
 import html from "./some.component.html" with { type: "text" };
 import styles from "./some.component.css";
+
 @Component({
   selector: 'selector-goes-here',
-  template: html
+  template: html,
   style: styles
 })
 export class SomeComponent extends BaseComponent {}
 ```
 
-Services are lazily instatiated and then shared in a map across components via Context:
+Services are lazily instantiated and then shared in a map across components via Context:
 
 ```typescript
 import { Service } from "fornaxjs";
@@ -241,13 +249,11 @@ export class HelloWorld extends BaseComponent {
 
 ---
 
-## Conditional and Iterative Rendering with `*if` and `*for`
+## Conditional and Iterative Rendering with `*if` and `*for` 🔀
 
 Fornax provides powerful directives for conditionally rendering elements (`*if`) and iterating over collections (`*for`). These directives simplify dynamic UI updates while keeping your templates clean and declarative.
 
----
-
-### `*if` Directive
+### `*if` Directive ❓
 
 The `*if` directive conditionally renders an element based on a boolean expression.
 
@@ -278,7 +284,7 @@ export class ExampleComponent extends BaseComponent {
 
 ---
 
-### `*for` Directive
+### `*for` Directive 🔂
 
 The `*for` directive iterates over a collection and renders the specified element for each item.
 
@@ -307,7 +313,7 @@ export class ExampleComponent extends BaseComponent {
 
 ---
 
-### Combined Usage
+### Combined Usage 🤝
 
 The `*if` and `*for` directives can be used together for complex rendering logic.
 
@@ -334,13 +340,11 @@ export class ExampleComponent extends BaseComponent {
 
 ---
 
-# **Fornax API Framework**
+# **Fornax API Framework** ⚡
 
 Fornax contains a lightweight, opinionated declarative API framework built on **Bun** and **Hono** with first-class support for **TypeScript** decorators, validation using **Zod**, and automatic OpenAPI documentation and Swagger generation. Simplify your API development with reusable models, robust validation, and seamless integration with Swagger.
 
----
-
-### **Defining Models**
+### **Defining Models** 🏗️
 
 Use decorators like `@String`, `@Number`, and `@ISODate` to define your models with validation rules and OpenAPI metadata:
 
@@ -368,11 +372,12 @@ export class Event {
 
 ---
 
-### **Defining Controllers**
+### **Defining Controllers** 🎛️
 
 Define your controllers and routes using decorators like `@Controller`, `@Get`, and `@Post`. Secure your routes using the `@Auth` decorator.
 
 #### Example Controller with Authentication
+
 ```typescript
 import { Controller, Get, Post } from 'fornax';
 import { Auth } from './auth-decorators';
@@ -429,7 +434,7 @@ export class EventController {
 
 ---
 
-### **Authentication Logic (WIP - NEEDS TESTING)**
+### **Authentication Logic (WIP - NEEDS TESTING)** 🔒
 
 The `@Auth` decorator enables you to define custom authentication logic for each route. This logic can include:
 
@@ -439,7 +444,7 @@ The `@Auth` decorator enables you to define custom authentication logic for each
 
 ---
 
-### **Key Features**
+### **Key Features** ✨
 
 - **TypeScript Decorators:** Simplify your API development with declarative decorators.
 - **Validation:** Built-in support for Zod schemas, including type-safe models and OpenAPI metadata.
@@ -451,32 +456,32 @@ Start building APIs faster and smarter with Fornax!
 
 ---
 
-## Contributing
+## Contributing 🤝
 
 Fornax is a young project aiming for a simple, productive development experience in the Bun ecosystem.
 
-1. **Fork and Clone:**
+1. **Fork and Clone** 🔀:
    ```bash
    git clone https://github.com/TBosak/fornax.git
    ```
-2. **Install Dependencies:**
+2. **Install Dependencies** 📦:
    ```bash
    bun install
    ```
-3. **Submit Pull Requests or Issues:**
+3. **Submit Pull Requests or Issues** 🗣️:
    We'd love your feedback and contributions!
 
 ---
 
-## License
+## License ⚖️
 
 Fornax is licensed under the MIT License. Feel free to use it in commercial and open-source projects.
 
-**Happy coding with Fornax!**
+**Happy coding with Fornax!** ✨
 
 ---
 
-## TODO:
+## TODO 📝
 
 ~~Parser - LRU Caching, deterministic & hierarchal ID generation~~ <br>
 ~~Router - build on top of Vaadin router for now~~ & create replacement later <br>
