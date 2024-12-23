@@ -327,7 +327,7 @@ export class ExampleComponent extends BaseComponent {
 
 ---
 
-# **Fornax API Framework (WIP - NOT FUNCTIONAL)**
+# **Fornax API Framework**
 
 Fornax contains a lightweight, opinionated API framework built on **Bun** and **Hono** with first-class support for **TypeScript** decorators, validation using **Zod**, and automatic OpenAPI documentation generation. Simplify your API development with reusable models, robust validation, and seamless integration with Swagger.
 
@@ -373,7 +373,7 @@ import { Event } from './models/Event';
 
 @Controller('/events')
 export class EventController {
-  @Get('/{id}', { params: Event }, Event)
+  @Get('/:id', { params: Event }, Event)
   @Auth(async (ctx) => {
     const authHeader = ctx.req.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -422,7 +422,7 @@ export class EventController {
 
 ---
 
-### **Authentication Logic**
+### **Authentication Logic (WIP - NEEDS TESTING)**
 
 The `@Auth` decorator enables you to define custom authentication logic for each route. This logic can include:
 
