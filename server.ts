@@ -23,7 +23,7 @@ import {
   Auth,
   Controller,
 } from "./core/Decorators";
-import { getProjectInfo } from "./core/Utilities";
+import { corsMiddleware, getProjectInfo } from "./core/Utilities";
 export {
   ControllerBase,
   Get,
@@ -49,4 +49,5 @@ export {
   OptionalNumberRange,
   Auth,
   getProjectInfo,
+  corsMiddleware,
 };

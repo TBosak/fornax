@@ -179,3 +179,33 @@ export function defineProperty(type: any, openapi: any = {}) {
     metadataRegistry.set(className, properties);
   };
 }
+
+export function corsMiddleware(options = {}) {
+  const defaults = {
+    origin: "*", // Allow all origins
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    headers: "Content-Type,Authorization",
+  };
+
+  const corsOptions = { ...defaults, ...options };
+
+  return async (ctx: any, next: any) => {
+    const origin =
+      corsOptions.origin === "*"
+        ? ctx.req.headers.get("origin") || "*"
+        : corsOptions.origin;
+
+    ctx.res.headers.set("Access-Control-Allow-Origin", origin);
+    ctx.res.headers.set("Access-Control-Allow-Methods", corsOptions.methods);
+    ctx.res.headers.set("Access-Control-Allow-Headers", corsOptions.headers);
+
+    // Handle preflight requests
+    if (ctx.req.method === "OPTIONS") {
+      ctx.res.status = 204; // No Content
+      return ctx.res;
+    }
+
+    // Proceed to next middleware or handler
+    await next();
+  };
+}
