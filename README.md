@@ -491,4 +491,5 @@ GraphQL support <br>
 Build out a unit testing framework <br>
 Integrate style preprocessors to handle SCSS or LESS <br>
 SCHEMATICS <br>
+Clean up this readme <br>
 ...
