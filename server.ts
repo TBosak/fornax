@@ -23,7 +23,7 @@ import {
   Auth,
   Controller,
 } from "./core/Decorators";
-import { corsMiddleware, getProjectInfo } from "./core/Utilities";
+import { getProjectInfo } from "./core/Utilities";
 export {
   ControllerBase,
   Get,
@@ -49,5 +49,5 @@ export {
   OptionalNumberRange,
   Auth,
   getProjectInfo,
-  corsMiddleware,
 };
+export type { Context } from "hono";

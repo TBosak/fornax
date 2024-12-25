@@ -10,6 +10,7 @@ import {
 import { EventEmitter } from "./core/EventEmitter";
 import { RouterOutlet, addRouter } from "./core/Routing";
 import { Context } from "./core/Context";
+import { ReactiveArray, Loop } from "./core/Models";
 export {
   BaseComponent,
   Component,
@@ -22,4 +23,6 @@ export {
   Service,
   Context,
   addRouter,
+  ReactiveArray,
+  Loop,
 };

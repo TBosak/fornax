@@ -508,7 +508,7 @@ Clean up folder structure - make it a little more intuitive <br>
 Create example projects <br>
 GraphQL support <br>
 Build out a unit testing framework <br>
-Integrate style preprocessors to handle SCSS or LESS <br>
+Default linter configurations to handle file imports<br>
 SCHEMATICS <br>
 Clean up this readme <br>
 ...

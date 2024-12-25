@@ -7,14 +7,13 @@ import {
   readFileSync,
 } from "fs";
 import path from "path";
-import { HttpMethod } from "./Models";
+import type { HttpMethod } from "./Models";
 import { createRoute, z } from "@hono/zod-openapi";
 import {
   metadataRegistry,
   modelRegistry,
   routeRegistry,
 } from "./scripts/constants";
-import { ZodOpenAPIMetadata } from "@asteasolutions/zod-to-openapi";
 
 export function ensureObject(o: any): object {
   return o != null && typeof o === "object" ? o : {};
@@ -22,27 +21,22 @@ export function ensureObject(o: any): object {
 
 export function makeSafeObject(o: any, visited = new WeakSet()): any {
   if (o === null || typeof o !== "object") {
-    // Return the value as-is if it's not an object
     return o;
   }
 
   if (visited.has(o)) {
-    // Circular reference detected; return undefined or a placeholder
     return undefined;
   }
 
   visited.add(o);
 
   if (Array.isArray(o)) {
-    // Process each item in the array
     return o.map((item) => makeSafeObject(item, visited));
   }
 
-  // Create a new object to avoid modifying the original
   const safeObj: any = {};
   for (const key of Object.keys(o)) {
     const value = o[key];
-    // Exclude functions
     if (typeof value !== "function") {
       safeObj[key] = makeSafeObject(value, visited);
     }
@@ -120,23 +114,22 @@ export function Route(
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
-    const paramsSchema = schemas.params
+    const paramsSchema = modelRegistry.get(schemas?.params?.name)
       ? modelRegistry.get(schemas.params.name)?.schema
-      : null;
-    const bodySchema = schemas.body
+      : mapTypeScriptTypeToOpenApi(schemas.params);
+    const bodySchema = modelRegistry.get(schemas?.body?.name)
       ? modelRegistry.get(schemas.body.name)?.schema
-      : null;
-    const querySchema = schemas.query
+      : mapTypeScriptTypeToOpenApi(schemas.body);
+    const querySchema = modelRegistry.get(schemas?.query?.name)
       ? modelRegistry.get(schemas.query.name)?.schema
-      : null;
-    const responseSchema = responseModel
+      : mapTypeScriptTypeToOpenApi(schemas.query);
+    const responseSchema = modelRegistry.get(responseModel?.name)
       ? modelRegistry.get(responseModel.name)?.schema
-      : null;
+      : mapTypeScriptTypeToOpenApi(responseModel);
 
     const controllerName = target.constructor.name;
     const routes = routeRegistry.get(controllerName) || [];
 
-    // Store route details including schemas
     routes.push({
       method,
       path,
@@ -158,7 +151,7 @@ export function getSchema(target: any): z.AnyZodObject {
 
   Object.keys(properties).forEach((key) => {
     const { type, openapi } = properties[key];
-    const zodType = type.openapi(openapi); // Attach OpenAPI metadata
+    const zodType = type.openapi(openapi);
     zodShape[key] = zodType;
   });
 
@@ -169,43 +162,27 @@ export function defineProperty(type: any, openapi: any = {}) {
   return function (target: any, key: string) {
     const className = target.constructor.name;
 
-    // Initialize metadata for the class if it doesn't exist
     if (!metadataRegistry.has(className)) {
       metadataRegistry.set(className, {});
     }
 
     const properties = metadataRegistry.get(className)!;
-    properties[key] = { type, openapi }; // Add type and OpenAPI metadata
+    properties[key] = { type, openapi };
     metadataRegistry.set(className, properties);
   };
 }
 
-export function corsMiddleware(options = {}) {
-  const defaults = {
-    origin: "*", // Allow all origins
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    headers: "Content-Type,Authorization",
-  };
+export function mapTypeScriptTypeToOpenApi(object: any): any {
+  if (object === String) return { type: "string" };
+  if (object === Number) return { type: "number" };
+  if (object === Boolean) return { type: "boolean" };
 
-  const corsOptions = { ...defaults, ...options };
-
-  return async (ctx: any, next: any) => {
-    const origin =
-      corsOptions.origin === "*"
-        ? ctx.req.headers.get("origin") || "*"
-        : corsOptions.origin;
-
-    ctx.res.headers.set("Access-Control-Allow-Origin", origin);
-    ctx.res.headers.set("Access-Control-Allow-Methods", corsOptions.methods);
-    ctx.res.headers.set("Access-Control-Allow-Headers", corsOptions.headers);
-
-    // Handle preflight requests
-    if (ctx.req.method === "OPTIONS") {
-      ctx.res.status = 204; // No Content
-      return ctx.res;
-    }
-
-    // Proceed to next middleware or handler
-    await next();
-  };
+  if (Array.isArray(object)) {
+    const itemType = object[0];
+    return {
+      type: "array",
+      items: mapTypeScriptTypeToOpenApi(itemType),
+    };
+  }
+  return object;
 }

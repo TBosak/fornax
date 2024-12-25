@@ -1,17 +1,23 @@
-import { Controller, Get, ControllerBase, Post } from "fornaxjs/server";
+import {
+  Controller,
+  Get,
+  ControllerBase,
+  Post,
+  type Context,
+} from "fornaxjs/server";
 import { Event } from "../models/event";
 
 @Controller("/events")
 export class EventController extends ControllerBase {
-  @Post("/", {}, Event)
-  async createEvent(ctx: any) {
-    const event = ctx.req.valid("json");
-    return this.Ok(ctx, event);
+  @Post("/", { body: Event }, Event)
+  async createEvent(ctx: Context) {
+    const body = await ctx.req.json();
+    return this.Ok(ctx, body);
   }
 
-  @Get("/:id", { params: Event }, Event)
-  async getEvent(ctx: any) {
-    const { id } = ctx.req.param("id");
+  @Get("/:id", { params: Number }, Event)
+  async getEvent(ctx: Context) {
+    const id = ctx.req.param("id");
     return this.Ok(ctx, {
       id,
       name: "Fornax Launch Party",

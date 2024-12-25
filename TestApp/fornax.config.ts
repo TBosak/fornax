@@ -10,5 +10,8 @@ export default {
   Server: {
     dir: "./src/server",
     port: 5500,
+    cors: {
+      origin: "*",
+    },
   },
 };

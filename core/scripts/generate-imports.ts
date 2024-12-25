@@ -5,17 +5,19 @@ import { copyFolderRecursiveSync } from "../Utilities";
 import styleLoader from "bun-style-loader";
 
 const config = loadConfig();
+const componentsDir = resolve(config.Client.srcDir, "./app/components");
+const servicesDir = resolve(config.Client.srcDir, "./app/services");
+const srcDir = resolve(config.Client.srcDir);
+const srcFiles = readdirSync(config.Client.srcDir);
+const distDir = resolve(config.Client.distDir);
+const componentFiles = readdirSync(componentsDir);
+const serviceFiles = readdirSync(servicesDir);
 
 try {
   const args = process.argv.slice(2);
   const initialLoad = args[0] === "true" || false;
-  clearChunks(config.Client.distDir);
-  const componentsDir = resolve(config.Client.srcDir, "./app/components");
-  const servicesDir = resolve(config.Client.srcDir, "./app/services");
-  const srcDir = resolve(config.Client.srcDir);
-  const srcFiles = readdirSync(config.Client.srcDir);
-  const componentFiles = readdirSync(componentsDir);
-  const serviceFiles = readdirSync(servicesDir);
+  clearChunks();
+
   const imports =
     getImportPaths(componentFiles, componentsDir) +
     "\n" +
@@ -51,7 +53,7 @@ try {
     : styleLoader();
   const build = await Bun.build({
     entrypoints: [entryFile, routes, ...extraEntryPoints],
-    outdir: config.Client.distDir,
+    outdir: distDir,
     target: "browser",
     splitting: true,
     minify: false,
@@ -62,10 +64,7 @@ try {
   });
 
   if (initialLoad) {
-    copyFolderRecursiveSync(
-      join(config.Client.srcDir, "assets"),
-      join(config.Client.distDir, "assets")
-    );
+    copyFolderRecursiveSync(join(srcDir, "assets"), join(distDir, "assets"));
   }
 
   if (build.logs.length) {
@@ -75,7 +74,7 @@ try {
   console.error(e);
 }
 
-function clearChunks(distDir: string) {
+function clearChunks() {
   try {
     const files = readdirSync(distDir);
     const chunkRegex = /^chunk-.*\.js$/;

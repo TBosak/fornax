@@ -10,6 +10,8 @@ import {
 } from "./constants";
 import { OpenApiGeneratorV3 } from "@asteasolutions/zod-to-openapi";
 import { swaggerUI } from "@hono/swagger-ui";
+import { cors } from "hono/cors";
+import { trimTrailingSlash } from "hono/trailing-slash";
 
 const info = getProjectInfo();
 const config = loadConfig();
@@ -48,7 +50,7 @@ function generateOpenApiPaths() {
     const routes = routeRegistry.get(controller.constructor.name) || [];
 
     routes.forEach(({ method, path, schemas }) => {
-      const fullPath = `${basePath}${path}`;
+      const fullPath = `${basePath}${path.replace(/\/$/, "")}`;
 
       if (!paths[fullPath]) {
         paths[fullPath] = {};
@@ -61,32 +63,34 @@ function generateOpenApiPaths() {
             description: "Successful response",
             content: {
               "application/json": {
-                schema: getMetadata(schemas?.response)
-                  ? {
-                      $ref: `#/components/schemas/${
-                        getMetadata(schemas?.response).title
-                      }`,
-                    }
-                  : { type: "object" },
+                schema:
+                  getMetadata(schemas?.response) !== null
+                    ? {
+                        $ref: `#/components/schemas/${
+                          getMetadata(schemas?.response)?.title
+                        }`,
+                      }
+                    : schemas.response,
               },
             },
           },
         },
       };
-
       if (schemas.params) {
+        operation.parameters = operation.parameters || [];
         operation.parameters = [
           {
             name: "params",
             in: "path",
             required: true,
-            schema: getMetadata(schemas?.params)
-              ? {
-                  $ref: `#/components/schemas/${
-                    getMetadata(schemas?.params).title
-                  }`,
-                }
-              : { type: "object" },
+            schema:
+              getMetadata(schemas?.params) !== null
+                ? {
+                    $ref: `#/components/schemas/${
+                      getMetadata(schemas?.params)?.title
+                    }`,
+                  }
+                : schemas.params,
           },
         ];
       }
@@ -97,13 +101,14 @@ function generateOpenApiPaths() {
           name: "query",
           in: "query",
           required: false,
-          schema: getMetadata(schemas?.query)
-            ? {
-                $ref: `#/components/schemas/${
-                  getMetadata(schemas?.query).title
-                }`,
-              }
-            : { type: "object" },
+          schema:
+            getMetadata(schemas?.query) !== null
+              ? {
+                  $ref: `#/components/schemas/${
+                    getMetadata(schemas?.query)?.title
+                  }`,
+                }
+              : schemas.query,
         });
       }
 
@@ -112,13 +117,14 @@ function generateOpenApiPaths() {
           required: true,
           content: {
             "application/json": {
-              schema: getMetadata(schemas?.body)
-                ? {
-                    $ref: `#/components/schemas/${
-                      getMetadata(schemas?.body).title
-                    }`,
-                  }
-                : { type: "object" },
+              schema:
+                getMetadata(schemas?.body) !== null
+                  ? {
+                      $ref: `#/components/schemas/${
+                        getMetadata(schemas?.body)?.title
+                      }`,
+                    }
+                  : schemas.body,
             },
           },
         };
@@ -141,11 +147,17 @@ function getMetadata(schema: any) {
   if (schema?._def?.openapi?._internal?.refId) {
     return { title: schema._def.openapi._internal.refId };
   }
-  return {};
+
+  return null;
 }
 
 async function main() {
   await loadConsumingProjectModules();
+
+  if (config.Server.cors) {
+    app.use(cors(config.Server.cors));
+  }
+  app.use(trimTrailingSlash());
 
   controllerRegistry.forEach((controller, basePath) => {
     const routes = routeRegistry.get(controller.constructor.name) || [];
@@ -167,7 +179,6 @@ async function main() {
         title: info.title || "API Documentation",
         description: info.description || "OpenAPI Specification",
       },
-      servers: [{ url: "v1" }],
     });
 
     spec.paths = generateOpenApiPaths();

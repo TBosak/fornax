@@ -355,7 +355,7 @@ export function Auth(
       try {
         await authLogic(ctx);
         return await originalMethod.call(this, ctx);
-      } catch (error) {
+      } catch (error: any) {
         return ctx.json(
           { error: error.message || "Unauthorized" },
           error.status || 401
@@ -364,5 +364,113 @@ export function Auth(
     };
 
     descriptor.value.openapi = openapi;
+  };
+}
+
+// General Purpose Decorators
+//TEST FUNCTIONALITY
+export function Memoize() {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) {
+    const originalMethod = descriptor.value;
+    const cacheKey = Symbol(`__memoize_${propertyKey}`);
+
+    descriptor.value = function (...args: any[]) {
+      const instance = this as { [key: symbol]: Map<string, any> };
+
+      if (!instance[cacheKey]) {
+        instance[cacheKey] = new Map<string, any>();
+      }
+
+      const cache = instance[cacheKey];
+      const key = JSON.stringify(args);
+
+      if (cache.has(key)) {
+        return cache.get(key);
+      }
+
+      const result = originalMethod.apply(this, args);
+      cache.set(key, result);
+      return result;
+    };
+
+    return descriptor;
+  };
+}
+
+const timeouts = new WeakMap<object, Map<string, Timer>>();
+
+//TEST FUNCTIONALITY
+export function Debounce(delay: number) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = function (...args: any[]) {
+      let instanceTimeouts = timeouts.get(this);
+
+      if (!instanceTimeouts) {
+        instanceTimeouts = new Map();
+        timeouts.set(this, instanceTimeouts);
+      }
+
+      if (instanceTimeouts.has(propertyKey)) {
+        clearTimeout(instanceTimeouts.get(propertyKey)!);
+      }
+
+      // Set a new timeout
+      const timeout = setTimeout(() => {
+        originalMethod.apply(this, args);
+        instanceTimeouts.delete(propertyKey);
+      }, delay);
+
+      instanceTimeouts.set(propertyKey, timeout);
+    };
+
+    return descriptor;
+  };
+}
+
+//TEST FUNCTIONALITY
+export function Watch(propertyKey: string) {
+  return function (target: any, methodName: string) {
+    const privateKey = `__${propertyKey}`;
+
+    const originalDescriptor =
+      Object.getOwnPropertyDescriptor(target, propertyKey) || {};
+
+    Object.defineProperty(target, propertyKey, {
+      get() {
+        if (!Object.prototype.hasOwnProperty.call(this, privateKey)) {
+          this[privateKey] = originalDescriptor.value ?? undefined;
+        }
+
+        if (originalDescriptor.get) {
+          return originalDescriptor.get.call(this);
+        }
+        return this[privateKey];
+      },
+      set(value: any) {
+        const oldValue = this[propertyKey];
+
+        if (originalDescriptor.set) {
+          originalDescriptor.set.call(this, value);
+        } else {
+          this[privateKey] = value;
+        }
+
+        if (oldValue !== value) {
+          this[methodName]();
+        }
+      },
+      configurable: true,
+      enumerable: true,
+    });
   };
 }
