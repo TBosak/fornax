@@ -76,9 +76,9 @@ project/
 |  |  ├─ services/
 |  ├─ server/
 |  |  ├─ controllers/
-|  |  |   ├─ event.controller.ts
+|  |  |   ├─ some.controller.ts
 |  |  ├─ models/
-|  |  |   ├─ event.ts
+|  |  |   ├─ some.ts
 ├─ fornax.config.ts
 └─ main.ts
 ```
