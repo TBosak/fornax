@@ -1,0 +1,18 @@
+import { Component, BaseComponent } from "fornaxjs";
+import html from "./<%= name.toLowerCase() %>.component.html" with { type: "text" };
+import styles from "./<%= name.toLowerCase() %>.component.css";
+
+@Component({
+selector: "app-<%= name.toLowerCase() %>",
+template: html,
+style: css,
+})
+export class <%= name.replace(/\w\S*/g, text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()) %>Component extends BaseComponent {
+
+onInit() {
+}
+
+onDestroy() {
+}
+
+}

@@ -16,8 +16,10 @@
     "@types/parse5": "^7.0.0",
     "@vaadin/router": "^2.0.0",
     "bun-style-loader": "^0.4.0",
+    "ejs": "^3.1.10",
     "hono": "^4.6.14",
     "incremental-dom": "^0.7.0",
+    "inquirer": "^12.3.0",
     "parse5": "^7.2.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"

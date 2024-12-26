@@ -38,63 +38,81 @@ export async function runInBackground(
   return proc;
 }
 
-async function dev() {
-  // Generate imports
-  const clientProc = await runInBackground("bun", [
-    `${__dirname}/client.ts`,
-    "--watch",
-  ]);
-  const serverProc = Bun.spawn(["bun", `${__dirname}/server.ts`], {
-    cwd: process.cwd(),
-    env: process.env,
-    stdout: "inherit",
-    stderr: "inherit",
-  });
+async function dev(options: { client?: boolean; server?: boolean }) {
+  const procs: any[] = [];
+
+  if (options.client ?? true) {
+    console.log("Starting client in watch mode...");
+    const clientProc = await runInBackground("bun", [
+      `${__dirname}/client.ts`,
+      "--watch",
+    ]);
+    procs.push(clientProc);
+  }
+
+  if (options.server ?? true) {
+    console.log("Starting server...");
+    const serverProc = Bun.spawn(["bun", `${__dirname}/server.ts`], {
+      cwd: process.cwd(),
+      env: process.env,
+      stdout: "inherit",
+      stderr: "inherit",
+    });
+    procs.push(serverProc);
+  }
 
   process.on("SIGINT", () => {
-    clientProc.kill();
-    serverProc.kill();
+    procs.forEach((proc) => proc.kill());
     process.exit(0);
   });
 
   process.on("SIGTERM", () => {
-    clientProc.kill();
-    serverProc.kill();
+    procs.forEach((proc) => proc.kill());
     process.exit(0);
   });
 }
 
 async function build() {
-  // Generate imports
+  console.log("Building project...");
   await runCommand("bun", ["run", `${__dirname}/build.ts`]);
   console.log("Build complete!");
 }
 
-async function start(config: FornaxConfig) {
-  // Ensure dist is built
-  if (!existsSync(resolve(config.Client.distDir))) {
+async function start(
+  config: FornaxConfig,
+  options: { client?: boolean; server?: boolean }
+) {
+  const procs: any[] = [];
+
+  if ((options.client ?? true) && !existsSync(resolve(config.Client.distDir))) {
     console.log("Dist directory not found. Running build...");
     await build();
   }
 
-  // Start server without watch
-  const clientProc = await runInBackground("bun", [`${__dirname}/client.ts`]);
-  const serverProc = Bun.spawn(["bun", `${__dirname}/server.ts`], {
-    cwd: process.cwd(),
-    env: process.env,
-    stdout: "inherit",
-    stderr: "inherit",
-  });
+  if (options.client ?? true) {
+    console.log("Starting client...");
+    const clientProc = await runInBackground("bun", [`${__dirname}/client.ts`]);
+    procs.push(clientProc);
+  }
+
+  if (options.server ?? true) {
+    console.log("Starting server...");
+    const serverProc = Bun.spawn(["bun", `${__dirname}/server.ts`], {
+      cwd: process.cwd(),
+      env: process.env,
+      stdout: "inherit",
+      stderr: "inherit",
+    });
+    procs.push(serverProc);
+  }
 
   process.on("SIGINT", () => {
-    clientProc.kill();
-    serverProc.kill();
+    procs.forEach((proc) => proc.kill());
     process.exit(0);
   });
 
   process.on("SIGTERM", () => {
-    clientProc.kill();
-    serverProc.kill();
+    procs.forEach((proc) => proc.kill());
     process.exit(0);
   });
 }
@@ -106,16 +124,28 @@ async function start(config: FornaxConfig) {
 
   switch (command) {
     case "dev":
-      await dev();
+      await dev({
+        client: true,
+        server: true,
+      });
       break;
     case "build":
       await build();
       break;
     case "start":
-      await start(config);
+      await start(config, {
+        client: true,
+        server: true,
+      });
+      break;
+    case "start:client":
+      await start(config, { client: true, server: false });
+      break;
+    case "start:server":
+      await start(config, { client: false, server: true });
       break;
     default:
-      console.log(`Usage: fnx [dev|build|start]`);
+      console.log(`Usage: fnx [dev|build|start|start:client|start:server]`);
       process.exit(1);
   }
 })();
