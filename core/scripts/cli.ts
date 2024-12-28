@@ -4,7 +4,11 @@ import { resolve } from "path";
 import { existsSync } from "fs";
 import inquirer from "inquirer";
 import { loadConfig } from "./load-config";
-import { generateComponent, generateController } from "../schematics";
+import {
+  generateComponent,
+  generateController,
+  generateProject,
+} from "../schematics";
 
 const config = loadConfig();
 
@@ -157,6 +161,7 @@ async function generate() {
   const destMap = {
     component: resolve(config.Client.srcDir, "components"),
     controller: config.Server.dir,
+    project: process.cwd(),
   };
 
   const promptIfMissing = async () => {
@@ -165,7 +170,7 @@ async function generate() {
         type: "list",
         name: "type",
         message: "What would you like to generate?",
-        choices: ["Component", "Controller"],
+        choices: ["Component", "Controller", "Project"],
       },
       {
         type: "input",
@@ -182,7 +187,7 @@ async function generate() {
   const destDir = destMap[resolvedType.toLowerCase()];
   if (!destDir) {
     console.error(
-      `Unknown type "${resolvedType}". Use "component" or "controller".`
+      `Unknown type "${resolvedType}". Use "component", "controller", or "project".`
     );
     process.exit(1);
   }
@@ -190,6 +195,7 @@ async function generate() {
   const generators = {
     component: generateComponent,
     controller: generateController,
+    project: generateProject,
   };
 
   const generator = generators[resolvedType.toLowerCase()];

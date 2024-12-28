@@ -12,8 +12,5 @@
   "peerDependencies": {
     "typescript": "^5.0.0",
     "fornaxjs": "link:fornaxjs"
-  },
-  "dependencies": {
-    "@hono/zod-openapi": "^0.18.3"
   }
 }

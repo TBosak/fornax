@@ -2,9 +2,8 @@ import { existsSync, mkdirSync, rm, writeFileSync } from "fs";
 import { resolve, join } from "path";
 import { render } from "ejs";
 import templates from "./templates.toml";
-import { file } from "bun";
+import { spawn } from "bun";
 
-// Utility function to write files
 function writeFile(filePath: string, content: string) {
   const dir = resolve(filePath, "..");
   if (!existsSync(dir)) {
@@ -53,4 +52,15 @@ export async function generateController(name: string, destDir: string) {
   });
 
   console.log(`Component "${name}" created at ${destDir}`);
+}
+
+export async function generateProject(projectName: string, destDir: string) {
+  const projectPath = resolve(destDir, projectName);
+  const proc = spawn({
+    cmd: ["bun", "create", "tbosak/create-fornax", projectName],
+    cwd: destDir,
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+  console.log(`Project "${projectName}" created at ${projectPath}`);
 }
