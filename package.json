@@ -1,6 +1,6 @@
 {
   "name": "fornaxjs",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "bin": {
     "fnx": "bun run ./core/scripts/cli.ts --silent=false"
@@ -43,5 +43,6 @@
     "./core/types/global.d.ts",
     "./build/release.d.ts"
   ],
-  "types": "./core/types/global.d.ts"
+  "types": "./core/types/global.d.ts",
+  "sideEffects": true
 }
