@@ -68,7 +68,6 @@ project/
 │  |  ├─ index.html
 │  |  ├─ routes.ts
 │  |  ├─ app.component.ts
-│  |  ├─ app/
 │  │  ├─ components/
 │  │  │   ├─ some.component.ts
 │  │  │   ├─ other.component.ts
