@@ -1,6 +1,6 @@
 import { addRouter } from "fornaxjs";
-import { HelloWorld } from "./app/components/hello-world.component";
-import { Other } from "./app/components/other.component";
+import { HelloWorld } from "./components/hello-world.component";
+import { Other } from "./components/other.component";
 
 export const routes: any[] = [
   { path: "/", component: HelloWorld },

@@ -5,8 +5,8 @@ import { copyFolderRecursiveSync } from "../Utilities";
 import styleLoader from "bun-style-loader";
 
 const config = loadConfig();
-const componentsDir = resolve(config.Client.srcDir, "./app/components");
-const servicesDir = resolve(config.Client.srcDir, "./app/services");
+const componentsDir = resolve(config.Client.srcDir, "./components");
+const servicesDir = resolve(config.Client.srcDir, "./services");
 const srcDir = resolve(config.Client.srcDir);
 const srcFiles = readdirSync(config.Client.srcDir);
 const distDir = resolve(config.Client.distDir);
