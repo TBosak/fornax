@@ -29,7 +29,17 @@ Fornax is a lightweight, opinionated, and highly customizable Bun-powered full-s
 - **Bun** 🍞: Install Bun from [https://bun.sh/](https://bun.sh/)
 
 ### Installation ⚙️
-Add Fornax to your existing Bun project:
+Create a new Fornax project:
+```bash
+bunx fnx generate project <project name>
+```
+OR just:
+```bash
+bunx fnx
+```
+Then follow the prompts to generate from schematics.
+
+If adding Fornax to your existing Bun project:
 
 ```bash
 bun add fornaxjs
