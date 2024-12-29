@@ -518,6 +518,6 @@ Create example projects <br>
 GraphQL support <br>
 Build out a unit testing framework <br>
 Default linter configurations to handle file imports<br>
-SCHEMATICS <br>
+~~SCHEMATICS~~ <br>
 Clean up this readme <br>
 ...
