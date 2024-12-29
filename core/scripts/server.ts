@@ -1,20 +1,16 @@
 import { getProjectInfo } from "../Utilities";
 import { readdirSync } from "fs";
 import path from "path";
-import { loadConfig } from "./load-config";
-import {
-  app,
-  controllerRegistry,
-  openAPIRegistry,
-  routeRegistry,
-} from "./constants";
+import { loadConfig } from "../scripts/load-config";
 import { OpenApiGeneratorV3 } from "@asteasolutions/zod-to-openapi";
 import { swaggerUI } from "@hono/swagger-ui";
 import { cors } from "hono/cors";
 import { trimTrailingSlash } from "hono/trailing-slash";
+import { getGlobalAppInstance } from "fornax-server";
 
 const info = getProjectInfo();
 const config = loadConfig();
+const app = getGlobalAppInstance();
 
 if (isNaN(config.Server.port)) {
   console.error("Invalid port configuration");
@@ -45,10 +41,8 @@ async function loadConsumingProjectModules() {
 
 function generateOpenApiPaths() {
   const paths: Record<string, any> = {};
-
-  controllerRegistry.forEach((controller, basePath) => {
-    const routes = routeRegistry.get(controller.constructor.name) || [];
-
+  app.controllerRegistry.forEach((controller, basePath) => {
+    const routes = app.routeRegistry.get(controller.constructor.name) || [];
     routes.forEach(({ method, path, schemas }) => {
       const fullPath = `${basePath}${path.replace(/\/$/, "")}`;
 
@@ -153,25 +147,25 @@ function getMetadata(schema: any) {
 
 async function main() {
   await loadConsumingProjectModules();
-
   if (config.Server.cors) {
-    app.use(cors(config.Server.cors));
+    app.hono.use(cors(config.Server.cors));
   }
-  app.use(trimTrailingSlash());
-
-  controllerRegistry.forEach((controller, basePath) => {
-    const routes = routeRegistry.get(controller.constructor.name) || [];
+  app.hono.use(trimTrailingSlash());
+  app.controllerRegistry.forEach((controller, basePath) => {
+    const routes = app.routeRegistry.get(controller.constructor.name) || [];
     routes.forEach((route) => {
       controller[route.method](
         route.path,
         controller[route.handler].bind(controller)
       );
     });
-    app.route(basePath, controller);
+    app.hono.route(basePath, controller);
   });
 
-  app.get("/doc", async (ctx: any) => {
-    const generator = new OpenApiGeneratorV3(openAPIRegistry.definitions);
+  app.hono.get("/doc", async (ctx: any) => {
+    const generator = new OpenApiGeneratorV3(
+      app.hono.openAPIRegistry.definitions
+    );
     const spec = generator.generateDocument({
       openapi: "3.0.0",
       info: {
@@ -186,17 +180,19 @@ async function main() {
     return ctx.json(spec);
   });
 
-  app.get("/swagger", swaggerUI({ url: "/doc" }));
+  app.hono.get("/swagger", swaggerUI({ url: "/doc" }));
 
   console.log(`API is running at http://localhost:${config.Server.port}`);
 
   Bun.serve({
-    fetch: app.fetch,
+    fetch: app.hono.fetch,
     port: config.Server.port,
   });
 }
 
-main().catch((err) => {
-  console.error("Failed to start server:", err);
-  process.exit(1);
-});
+if (import.meta.main) {
+  main().catch((err) => {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  });
+}

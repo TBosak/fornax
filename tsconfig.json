@@ -23,9 +23,10 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
+    "baseUrl": ".",
     "paths": {
-      "fornax": ["./"]
+      "fornax": ["./"],
     }
   },
-  "include": ["./core/types/global.d.ts","./core/types/zod-extensions.d.ts"],
+  "include": ["./core/types/global.d.ts","./core/types/zod-extensions.d.ts", "./core/App.ts"],
 }

@@ -1,6 +1,6 @@
 {
   "name": "fornaxjs",
-  "version": "0.1.3",
+  "version": "0.1.7",
   "type": "module",
   "bin": {
     "fnx": "bun run ./core/scripts/cli.ts --silent=false"
@@ -17,6 +17,7 @@
     "@vaadin/router": "^2.0.0",
     "bun-style-loader": "^0.4.0",
     "ejs": "^3.1.10",
+    "fornax-server": "latest",
     "hono": "^4.6.14",
     "incremental-dom": "^0.7.0",
     "inquirer": "^12.3.0",

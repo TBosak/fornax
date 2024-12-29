@@ -59,8 +59,6 @@ export interface ServiceOptions {
   singleton?: boolean;
 }
 
-export type HttpMethod = "get" | "post" | "put" | "delete";
-
 //TEST FUNCTIONALITY
 export class Loop<T> extends Observable<T> {
   private subject: BehaviorSubject<T>;

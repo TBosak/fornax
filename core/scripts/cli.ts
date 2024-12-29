@@ -58,8 +58,9 @@ async function dev(options: { client?: boolean; server?: boolean }) {
   }
 
   if (options.server ?? true) {
+    const serverPath = resolve(__dirname, "./server.ts");
     console.log("Starting server...");
-    const serverProc = Bun.spawn(["bun", `${__dirname}/server.ts`], {
+    const serverProc = Bun.spawn(["bun", serverPath], {
       cwd: process.cwd(),
       env: process.env,
       stdout: "inherit",
@@ -133,8 +134,9 @@ async function start(options: {
   }
 
   if (options.server ?? true) {
+    const serverPath = resolve(__dirname, "./server.ts");
     console.log("Starting server...");
-    const serverProc = Bun.spawn(["bun", `${__dirname}/server.ts`], {
+    const serverProc = Bun.spawn(["bun", serverPath], {
       cwd: process.cwd(),
       env: process.env,
       stdout: "inherit",
